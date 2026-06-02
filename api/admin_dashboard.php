@@ -14,7 +14,7 @@ if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
 $current_page = $_GET['page'] ?? 'dashboard';
 
 // Connect using your existing db config
-require_once '../db.php';
+require_once 'db.php';
 
 // ── 1. IMPORT PHPMAILER FILES ──
 use PHPMailer\PHPMailer\PHPMailer;
