@@ -451,7 +451,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }, 1800);
 
             setTimeout(function() {
-                window.location.href = 'api/admin_dashboard.php';
+                window.location.href = 'admin_dashboard.php';
             }, 2200);
         }
 
