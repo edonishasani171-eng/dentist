@@ -220,7 +220,7 @@
 </section>
 <footer>
     <p>© 2026 DentCare Pejë. Të gjitha të drejtat e rezervuara.</p>
-    <a href="api/login.php">Portal i Personalit →</a>
+    <a href="login.php">Portal i Personalit →</a>
 </footer>
 
 <div class="success-overlay" id="success-overlay">
