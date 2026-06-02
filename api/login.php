@@ -2,6 +2,9 @@
 // admin/login.php
 session_start();
 
+// Include the centralized database connection file
+require_once 'db.php'; 
+
 $error = '';
 $show_animation = false; // Flag to trigger the animation
 
@@ -10,23 +13,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = trim($_POST['password'] ?? '');
 
     if (!empty($username) && !empty($password)) {
-        
         try {
-            $dsn = "mysql:host=localhost;dbname=dentist_db;charset=utf8mb4";
-            $db_user = "root"; 
-            $db_pass = "";     
-            
-            $pdo = new PDO($dsn, $db_user, $db_pass);
-            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            // $pdo is automatically created and configured inside your db.php file
+            if (!isset($pdo)) {
+                throw new Exception("Lidhja me databazën nuk është konfiguruar siç duhet.");
+            }
 
-            // Fetch the user from the database
+            // Fetch the user from your Neon PostgreSQL database
             $stmt = $pdo->prepare("SELECT id, username, password, role FROM users WHERE username = :username AND status = 'Active'");
             $stmt->execute(['username' => $username]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($user) {
-                // PLAIN-TEXT BYPASS: Checks if password matches safely
-                if ($password === 'dentist2026' || password_verify($password, $user['password'])) {
+                // Check against your encrypted password 'admin123'
+                if (password_verify($password, $user['password'])) {
                     $_SESSION['authenticated'] = true;
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['user_role'] = $user['role'];
@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = "Përdoruesi nuk ekziston ose është jo-aktiv!";
             }
 
-        } catch (PDOException $e) {
+        } catch (Exception $e) {
             $error = "Lidhja dështoi: " . $e->getMessage();
         }
     } else {
