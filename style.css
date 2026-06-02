@@ -1,0 +1,925 @@
+:root {
+    --green:       #1a7a5e;
+    --green-dark:  #0f5441;
+    --green-light: #e8f5f1;
+    --green-mid:   #c2e8dc;
+    --cream:       #faf8f4;
+    --cream-dark:  #f0ece3;
+    --text:        #1a1a18;
+    --text-mid:    #4a4a45;
+    --text-soft:   #8a8a82;
+    --white:       #ffffff;
+    --border:      rgba(26,26,24,0.10);
+    --red:         #c0392b;
+    --radius:      14px;
+    --shadow:      0 2px 24px rgba(26,122,94,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ── NOISE TEXTURE OVERLAY ── */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── NAV ── */
+nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 48px;
+    height: 68px;
+    background: rgba(250,248,244,0.88);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+}
+
+/* Butoni me 3 vija për Mobile (Fshihet në Desktop) */
+.menu-toggle {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 24px;
+    height: 18px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1001;
+}
+
+.menu-toggle span {
+    width: 100%;
+    height: 3px;
+    background-color: var(--green);
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.nav-logo-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--green);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-logo-icon svg { width: 20px; height: 20px; fill: white; }
+
+.nav-logo-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--text);
+    letter-spacing: -0.02em;
+}
+
+.nav-logo-text span { color: var(--green); }
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    list-style: none;
+}
+
+.nav-links a {
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-mid);
+    transition: color .2s;
+    /* --- SHTO KËTO DY RRESHTA MË POSHTË --- */
+    position: relative;
+    padding-bottom: 4px;
+}
+
+/* Shto këtë bllok të ri menjëherë këtu poshtë */
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--green);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s ease-in-out;
+}
+
+.nav-links a:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+.nav-links a:hover { color: var(--green); }
+
+.nav-cta {
+    background: var(--green) !important;
+    color: white !important;
+    padding: 9px 20px;
+    border-radius: 50px;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    transition: background .2s !important;
+}
+
+.nav-cta:hover { background: var(--green-dark) !important; }
+
+/* ── HERO ── */
+.hero {
+    position: relative;
+    overflow: hidden;
+    /* Ndryshuar: 140px lart (e shtyn poshtë), 48px anash, 90px poshtë */
+    padding: 140px 48px 90px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;    
+    justify-content: center; /* Shto këtë për qendërzim vertikal nëse ka nevojë */
+    text-align: center;     
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+/* bakcground color in the main page  */
+.hero-bg-circle {
+    position: absolute;
+    top: -120px;
+    right: -120px;
+    width: 650px;
+    height: 650px;
+    /* Kemi rritur opacity në 0.85 dhe kemi shtyrë tranzicionin e ngjyrës në 40% para se të zbehet */
+    background: radial-gradient(circle, rgba(162, 228, 205, 0.85) 0%, rgba(162, 228, 205, 0.4) 40%, rgba(162, 228, 205, 0) 70%);
+    filter: blur(50px); /* Ulur pak bluri që ngjyra të qëndrojë më e dëndur në qendër */
+    z-index: -1;
+    pointer-events: none;
+}
+.hero-bg-circle-bottom {
+    position: absolute;
+    /* E ngremë pak më lart dhe e zhvendosim djathtas që të mos preket nga skajet e ashpra */
+    bottom: -60px;
+    left: -100px;
+    width: 550px;
+    height: 550px;
+    /* Gradienti fillon të zbehet akoma më herët (në 30%) që skajet të jenë plotësisht transparente */
+    background: radial-gradient(circle, rgba(162, 228, 205, 0.85) 0%, rgba(162, 228, 205, 0.3) 30%, rgba(162, 228, 205, 0) 65%);
+    /* Rrisim blurin në 70px që të jetë ekstremisht i butë në skaje */
+    filter: blur(70px);
+    z-index: -1;
+    pointer-events: none;
+}
+
+.hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--green-light);
+    border: 1px solid var(--green-mid);
+    color: var(--green-dark);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 50px;
+    margin-bottom: 20px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.hero-tag::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+}
+
+.hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(42px, 5vw, 68px);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    max-width: 640px;
+    margin: 0 auto 20px; 
+}
+
+.hero h1 em {
+    font-style: italic;
+    color: var(--green);
+}
+
+.hero-sub {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--text-mid);
+    max-width: 480px;
+    margin: 0 auto 40px; 
+    font-weight: 300;
+}
+
+.hero-stats {
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+    justify-content: center; 
+}
+
+.hero-stat strong {
+    display: block;
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--text);
+    letter-spacing: -0.02em;
+}
+
+.hero-stat span {
+    font-size: 13px;
+    color: var(--text-soft);
+    font-weight: 300;
+}
+
+/* ── SERVICES STRIP ── */
+.services-strip {
+    display: flex;
+    gap: 12px;
+    padding: 0;
+    margin: 0 0 20px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex-wrap: wrap;
+}
+
+.service-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 50px;
+    font-size: 13px;
+    color: var(--text-mid);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all .2s;
+    font-weight: 400;
+}
+
+.service-pill:hover, .service-pill.active {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+}
+
+.service-pill svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+/* ── BOOKING SECTION ── */
+.booking-section {
+    padding: 0 48px 80px;
+}
+
+.booking-section h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+    text-align: center;
+    margin-top: 30px;
+}
+
+.booking-section .section-sub {
+    color: var(--text-soft);
+    font-size: 15px;
+    font-weight: 300;
+    margin-bottom: 36px;
+    text-align: center;
+}
+
+.booking-grid {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 24px;
+    align-items: start;
+    margin-top: 0;
+}
+
+/* ── FORM CARD ── */
+.form-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.form-section {
+    padding: 28px 32px;
+    border-bottom: 1px solid var(--border);
+}
+
+.form-section:last-child { border-bottom: none; }
+
+.form-section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.section-num {
+    width: 26px;
+    height: 26px;
+    background: var(--green);
+    color: white;
+    border-radius: 50%;
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-section-title h3 {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-row.single { grid-template-columns: 1fr; }
+
+.field { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 5px; 
+}
+
+label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-mid);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="date"],
+select,
+textarea {
+    padding: 11px 14px;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+    width: 100%;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: var(--green);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(26,122,94,0.1);
+}
+
+input::placeholder, textarea::placeholder { color: var(--text-soft); }
+
+select { 
+    cursor: pointer; 
+    appearance: none; 
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a8a82' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); 
+    background-repeat: no-repeat; 
+    background-position: right 14px center;
+    background-attachment: local;
+    background-size: 12px 8px;
+    padding-right: 36px; 
+}
+
+textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+/* ── TIME SLOTS ── */
+.time-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.time-btn {
+    padding: 10px 6px;
+    text-align: center;
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text-mid);
+    cursor: pointer;
+    transition: all .18s;
+    font-weight: 400;
+}
+
+.time-btn:hover:not(.taken) {
+    border-color: var(--green);
+    color: var(--green);
+    background: var(--green-light);
+}
+
+.time-btn.selected {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+    font-weight: 500;
+}
+
+.time-btn.taken {
+    background-color: #fdf2f2 !important;
+    color: #df473c !important;
+    border: 1px solid #f5baba !important;
+    text-decoration: line-through;
+    cursor: not-allowed;
+    pointer-events: none; 
+    opacity: 0.65;
+}
+
+.slots-placeholder {
+    grid-column: 1/-1;
+    text-align: center;
+    padding: 24px;
+    color: var(--text-soft);
+    font-size: 13px;
+    background: var(--cream);
+    border-radius: 10px;
+    border: 1px dashed var(--border);
+}
+
+/* ── SUBMIT BUTTON ── */
+.submit-area {
+    padding: 24px 32px;
+}
+
+.btn-submit {
+    width: 100%;
+    padding: 15px;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    letter-spacing: -0.01em;
+}
+
+.btn-submit:hover { background: var(--green-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,122,94,0.25); }
+.btn-submit:active { transform: translateY(0); }
+.btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.btn-submit svg { width: 18px; height: 18px; }
+
+/* ── MAP ── */
+.map-section {
+    padding: 0 24px 40px 24px; 
+    max-width: 1200px;          
+    margin: 0 auto;            
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.map-container {
+    border-radius: 12px;       
+    overflow: hidden;          
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04); 
+    border: 1px solid #e6e6e2; 
+}
+
+.map-container iframe {
+    width: 100% !important;
+    height: 450px; /* Mund ta ndryshosh lartësinë këtu sipas dëshirës */
+    border: none;
+    display: block;
+}
+
+.map-section h2 {
+    font-family: "DM Serif Display", serif;
+    font-size: 32px;
+    color: var(--green);
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.map-section .section-sub {
+    font-family: "DM Sans", sans-serif;
+    font-size: 16px;
+    color: #6e6e66;
+    text-align: center;
+    margin-bottom: 32px; 
+}
+
+/* ── SUMMARY CARD ── */
+.summary-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 88px;
+}
+
+.summary-header {
+    padding: 22px 24px;
+    background: var(--green);
+    color: white;
+}
+
+.summary-header h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    margin-bottom: 2px;
+}
+
+.summary-header p { font-size: 13px; opacity: 0.8; font-weight: 300; }
+
+.summary-body { padding: 20px 24px; }
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+}
+
+.summary-row:last-child { border-bottom: none; }
+
+.summary-row .s-label { font-size: 12px; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+.summary-row .s-val { font-size: 14px; color: var(--text); font-weight: 500; text-align: left; }
+.summary-row .s-val.empty { color: var(--text-soft); font-weight: 300; font-style: italic; font-size: 13px; }
+
+/* ── CLINIC INFO ── */
+.clinic-info {
+    margin-top: 16px;
+    background: var(--green-light);
+    border-radius: 10px;
+    padding: 16px;
+}
+
+.clinic-info-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: var(--green-dark);
+}
+
+.clinic-info-row:last-child { margin-bottom: 0; }
+
+.clinic-info-row svg { width: 15px; height: 15px; flex-shrink: 0; opacity: 0.7; }
+
+/* ── SUCCESS STATE ── */
+.success-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26,26,24,0.5);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+}
+
+.success-overlay.show { display: flex; animation: fadeIn .3s ease; }
+
+.success-box {
+    background: white;
+    border-radius: 20px;
+    padding: 48px 40px;
+    max-width: 440px;
+    width: 90%;
+    text-align: center;
+    animation: slideUp .35s ease;
+}
+
+.success-icon {
+    width: 72px;
+    height: 72px;
+    background: var(--green-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+.success-icon svg { width: 36px; height: 36px; stroke: var(--green); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+
+.success-box h2 { font-family: 'DM Serif Display', serif; font-size: 26px; margin-bottom: 10px; letter-spacing: -0.02em; }
+.success-box p { color: var(--text-mid); font-size: 15px; line-height: 1.6; font-weight: 300; margin-bottom: 28px; }
+
+.success-detail {
+    background: var(--cream);
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-align: left;
+    margin-bottom: 24px;
+    font-size: 14px;
+    color: var(--text-mid);
+    line-height: 1.8;
+}
+
+.success-detail strong { color: var(--text); font-weight: 500; }
+
+.btn-close {
+    background: var(--green);
+    color: white;
+    border: none;
+    padding: 13px 32px;
+    border-radius: 50px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .2s;
+}
+
+.btn-close:hover { background: var(--green-dark); }
+
+/* ── ERROR / VALIDATION ── */
+.field-error { font-size: 11px; color: var(--red); margin-top: 3px; display: none; }
+input.error, select.error, textarea.error { border-color: var(--red) !important; }
+
+/* ── FOOTER ── */
+footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--white);
+}
+
+footer p { font-size: 13px; color: var(--text-soft); }
+
+footer a { color: var(--green); text-decoration: none; font-size: 13px; }
+
+/* ── LOADING SPINNER ── */
+.spinner {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin .7s linear infinite;
+    display: none;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+    nav { padding: 0 20px; }
+    .hero, .booking-section, .services-strip { padding-left: 20px; padding-right: 20px; }
+    .booking-grid { grid-template-columns: 1fr; }
+    .summary-card { position: static; }
+    .form-row { grid-template-columns: 1fr; }
+    .time-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ── TABLET (max 768px) ── */
+@media (max-width: 768px) {
+    /* 1. Këtu aktivizojmë tri vijat */
+    .menu-toggle {
+        display: flex;
+    }
+
+    /* 2. Kthejmë menunë në dropdown vertikal */
+    .nav-links {
+        /* Në vend të display: none, përdorim këto për animacion */
+        display: flex; 
+        position: absolute;
+        top: 68px; 
+        left: 0;
+        width: 100%;
+        background-color: var(--white);
+        flex-direction: column;
+        padding: 0;              /* Fillimisht pa padding që mos zërë hapësirë */
+        max-height: 0;           /* Lartësia fillon nga 0 */
+        opacity: 0;              /* E padukshme */
+        overflow: hidden;        /* Fsheh përmbajtjen brenda */
+        box-shadow: 0 10px 15px rgba(0,0,0,0.05);
+        border-bottom: 0 solid var(--border);
+        gap: 16px;
+        z-index: 1000;
+        
+        /* Kjo bën zbutjen e hapjes dhe shfaqjes për 0.4 sekonda */
+        transition: max-height 0.5s ease-in-out, opacity 0.3s ease-in-out, padding 0.4s ease-in-out;
+    }
+
+    /* Kur klasa 'active' shtohet nga JS */
+    .nav-links.active {
+        max-height: 300px;       /* Japi një lartësi të mjaftueshme sa për linqet */
+        opacity: 1;              /* Shfaqet plotësisht */
+        padding: 24px 0;         /* Kthehet padding-u kur hapet */
+        border-bottom: 1px solid var(--border);
+    }
+
+    .nav-links li {
+        width: 100%;
+        text-align: center;
+    }
+
+    .nav-links a {
+        display: inline-block;
+        padding: 10px 0;
+        width: auto;
+        font-size: 16px;
+    }
+
+    .hero {
+        padding: 90px 20px 60px;
+    }
+
+    .hero h1 {
+        font-size: 36px;
+    }
+
+    .hero-sub {
+        font-size: 15px;
+    }
+
+    .hero-stats {
+        gap: 20px;
+    }
+
+    .booking-section h2 {
+        font-size: 26px;
+    }
+
+    .form-section {
+        padding: 20px 18px;
+    }
+
+    .submit-area {
+        padding: 18px;
+    }
+
+    footer {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+        padding: 24px 20px;
+    }
+}
+
+/* ── MOBILE (max 480px) ── */
+@media (max-width: 480px) {
+    nav {
+        padding: 0 16px;
+        height: 58px;
+    }
+
+    /* KJO U LARGUA: '.nav-links { display: none; }' është hequr që të mos bllokojë menunë active */
+
+    .hero {
+        padding: 70px 16px 50px;
+    }
+
+    .hero h1 {
+        font-size: 28px;
+    }
+
+    .hero-sub {
+        font-size: 14px;
+    }
+
+    .hero-stat strong {
+        font-size: 22px;
+    }
+
+    .hero-stats {
+        flex-direction: column;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .booking-section {
+        padding: 0 16px 50px;
+    }
+
+    .booking-section h2 {
+        font-size: 22px;
+    }
+
+    .time-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .success-box {
+        padding: 32px 20px;
+    }
+
+    .success-box h2 {
+        font-size: 22px;
+    }
+
+    .services-strip {
+        gap: 8px;
+    }
+
+    .service-pill {
+        font-size: 12px;
+        padding: 8px 14px;
+    }
+
+    footer {
+        padding: 20px 16px;
+    }
+}
+
+/* Styling for backend validation errors */
+#error-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+    display: flex; 
+}
+
+#error-overlay .btn-close:hover {
+    background: #c0392b !important;
+}
+
+/* Stili për Modalin e Ri të Konfirmimit */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10000; 
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-box {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 16px; 
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 450px;
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-box {
+    transform: translateY(0);
+}
