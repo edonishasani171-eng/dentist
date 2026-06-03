@@ -44,6 +44,8 @@ function sendStatusEmail($patientEmail, $patientName, $statusType, $appointmentD
         $mail->Port       = 587;
         $mail->CharSet    = 'UTF-8';
 
+        $mail->Timeout    = 3;       // Max seconds to wait for a response from SMTP
+        $mail->SMTPKeepAlive = false;
         // Recipients
         $mail->setFrom('edonishasaniii17@gmail.com', 'DentCare Pejë'); // <-- Put your real Gmail address here too
         $mail->addAddress($patientEmail, $patientName);
