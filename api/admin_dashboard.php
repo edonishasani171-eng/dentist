@@ -10,7 +10,7 @@ if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
     exit;
 }
 
-// Track current view state
+// Track current view state 
 $current_page = $_GET['page'] ?? 'dashboard';
 
 // Connect using your existing db config
@@ -112,8 +112,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         if ($app) {
             $update_stmt = $pdo->prepare("UPDATE appointments SET status = 'Confirmed' WHERE id = :id");
             if ($update_stmt->execute(['id' => $target_id])) {
-                // Instantly trigger email
-                sendStatusEmail($app['email'], $app['patient'], 'Confirmed', $app);
+                
+                // MBROJTJA PËR RENDER: Izolojmë dërgimin e email-it që mos të bëjë crash faqja
+                try {
+                    sendStatusEmail($app['email'], $app['patient'], 'Confirmed', $app);
+                } catch (Exception $email_error) {
+                    // Nëse Render e bllokon portën, regjistrohet këtu por faqja NUK rrëzohet
+                    error_log("Email confirmation failed to send on Render: " . $email_error->getMessage());
+                }
+
             }
         }
     } catch (PDOException $e) {
@@ -137,8 +144,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         if ($app) {
             $cancel_stmt = $pdo->prepare("UPDATE appointments SET status = 'Cancelled' WHERE id = :id");
             if ($cancel_stmt->execute(['id' => $target_id])) {
-                // Instantly trigger email
-                sendStatusEmail($app['email'], $app['patient'], 'Cancelled', $app);
+                
+                // MBROJTJA PËR RENDER: Izolojmë dërgimin e email-it që mos të bëjë crash faqja
+                try {
+                    sendStatusEmail($app['email'], $app['patient'], 'Cancelled', $app);
+                } catch (Exception $email_error) {
+                    // Nëse dështon dërgimi, ruhet regjistri i gabimit dhe kodi vazhdon
+                    error_log("Email cancellation failed to send on Render: " . $email_error->getMessage());
+                }
+
             }
         }
     } catch (PDOException $e) {
