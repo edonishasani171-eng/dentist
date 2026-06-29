@@ -44,6 +44,8 @@ function sendStatusEmail($patientEmail, $patientName, $statusType, $appointmentD
         $mail->Port       = 587;
         $mail->CharSet    = 'UTF-8';
 
+        $mail->Timeout    = 3;       // Max seconds to wait for a response from SMTP
+        $mail->SMTPKeepAlive = false;
         // Recipients
         $mail->setFrom('edonishasaniii17@gmail.com', 'DentCare Pejë'); // <-- Put your real Gmail address here too
         $mail->addAddress($patientEmail, $patientName);
@@ -913,6 +915,127 @@ try {
             border-radius: 999px;
             transition: width 0.1s linear;
         }
+        /* ── MOBILE RESPONSIVE FOR DASHBOARD ── */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column;
+    }
+
+    aside {
+        width: 100%;
+        height: auto;
+        position: relative;
+        padding: 16px 20px;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+        margin-bottom: 0;
+        flex: 1;
+    }
+
+    .menu {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 4px;
+        width: 100%;
+    }
+
+    .menu-item a {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    .logout-btn {
+        margin-top: 0;
+        border-top: none;
+        padding-top: 0;
+        border-left: 1px solid var(--border);
+        padding-left: 12px;
+    }
+
+    main {
+        padding: 20px 16px;
+    }
+
+    header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+
+    .card {
+        padding: 16px;
+    }
+
+    .card-value {
+        font-size: 26px;
+    }
+
+    .table-header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    #patientSearch {
+        width: 100%;
+    }
+
+    .search-box-wrapper {
+        width: 100%;
+    }
+
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+        min-width: 600px;
+    }
+
+    .modal-box {
+        padding: 20px 16px;
+        width: 95%;
+    }
+
+    .info-row {
+        grid-template-columns: 1fr;
+    }
+    }
+
+    @media (max-width: 480px) {
+        .metrics-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .menu-item a {
+            font-size: 12px;
+            padding: 7px 10px;
+        }
+
+        header h1 {
+            font-size: 22px;
+        }
+
+        .card-value {
+            font-size: 22px;
+        }
+    }
     </style>
 </head>
 <body>
