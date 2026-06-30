@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $password  = trim($_POST['password'] ?? '');
     $full_name = trim($_POST['full_name'] ?? '');
     $email     = trim($_POST['email'] ?? '');
+    $phone     = trim($_POST['phone'] ?? '');
 
     if (empty($username) || empty($password)) {
         $error = "Ju lutem plotësoni Username dhe Password!";
@@ -41,16 +42,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             } else {
                 $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-                $insert_stmt = $pdo->prepare(
-                    "INSERT INTO users (username, password, role, status, email, full_name)
-                     VALUES (:username, :password, 'staff', 'Active', :email, :full_name)"
-                );
-                $insert_stmt->execute([
-                    'username'  => $username,
-                    'password'  => $hashed_password,
-                    'email'     => $email !== '' ? $email : null,
-                    'full_name' => $full_name !== '' ? $full_name : null,
-                ]);
+                try {
+                    $insert_stmt = $pdo->prepare(
+                        "INSERT INTO users (username, password, role, status, email, full_name, phone)
+                         VALUES (:username, :password, 'staff', 'Active', :email, :full_name, :phone)"
+                    );
+                    $insert_stmt->execute([
+                        'username'  => $username,
+                        'password'  => $hashed_password,
+                        'email'     => $email !== '' ? $email : null,
+                        'full_name' => $full_name !== '' ? $full_name : null,
+                        'phone'     => $phone !== '' ? $phone : null,
+                    ]);
+                } catch (PDOException $colErr) {
+                    // Fallback in case the 'phone' column doesn't exist yet in the users table
+                    $insert_stmt = $pdo->prepare(
+                        "INSERT INTO users (username, password, role, status, email, full_name)
+                         VALUES (:username, :password, 'staff', 'Active', :email, :full_name)"
+                    );
+                    $insert_stmt->execute([
+                        'username'  => $username,
+                        'password'  => $hashed_password,
+                        'email'     => $email !== '' ? $email : null,
+                        'full_name' => $full_name !== '' ? $full_name : null,
+                    ]);
+                }
 
                 $success = "Punëtori u regjistrua me sukses! Ai/Ajo mund të hyjë tani me username: " . htmlspecialchars($username);
             }
@@ -81,14 +97,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // ── FETCH ALL WORKERS (role = staff) ──
 try {
     $workers_stmt = $pdo->query(
-        "SELECT id, username, full_name, email, status, created_at
+        "SELECT id, username, full_name, email, phone, status, created_at
          FROM users
          WHERE role = 'staff'
          ORDER BY id DESC"
     );
     $workers = $workers_stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
-    $workers = [];
+    // Fallback if 'phone' column doesn't exist
+    try {
+        $workers_stmt = $pdo->query(
+            "SELECT id, username, full_name, email, status, created_at
+             FROM users
+             WHERE role = 'staff'
+             ORDER BY id DESC"
+        );
+        $workers = $workers_stmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($workers as &$w) { $w['phone'] = null; }
+        unset($w);
+    } catch (PDOException $e2) {
+        $workers = [];
+    }
 }
 
 $staff_name = $_SESSION['username'] ?? 'Admin Staf';
@@ -295,6 +324,122 @@ $current_page = 'register_worker';
             background: var(--green-light);
             border: 1px solid var(--green-mid);
             color: var(--green-dark);
+        }
+
+        /* ── FULLSCREEN RESULT OVERLAY ── */
+        .result-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(26,26,24,0.55);
+            backdrop-filter: blur(6px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .result-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .result-box {
+            background: var(--white);
+            border-radius: 20px;
+            padding: 48px 40px;
+            max-width: 460px;
+            width: 90%;
+            text-align: center;
+            transform: scale(0.92) translateY(14px);
+            transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        .result-overlay.active .result-box { transform: scale(1) translateY(0); }
+
+        .result-icon {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 22px;
+            font-size: 36px;
+        }
+
+        .result-icon.success { background: var(--green-light); }
+        .result-icon.error { background: #fdf0ef; }
+
+        .result-box h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .result-box p {
+            color: var(--text-mid);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 26px;
+        }
+
+        .result-box button {
+            background: var(--green);
+            color: white;
+            border: none;
+            padding: 12px 32px;
+            border-radius: 50px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background .2s;
+        }
+
+        .result-box button:hover { background: var(--green-dark); }
+        .result-box.is-error button { background: var(--red); }
+        .result-box.is-error button:hover { background: #a52e22; }
+
+        /* ── WORKER SEARCH BAR ── */
+        .worker-search-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        #workerSearch {
+            width: 240px;
+            padding: 9px 14px 9px 34px;
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            background-color: var(--cream);
+            color: var(--text);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        #workerSearch:focus {
+            border-color: var(--green);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(26,122,94,0.12);
+        }
+
+        .worker-search-icon {
+            position: absolute;
+            left: 11px;
+            pointer-events: none;
+        }
+
+        .worker-search-icon svg {
+            width: 13px;
+            height: 13px;
+            stroke: var(--text-soft);
+            fill: none;
+            stroke-width: 2.5;
         }
 
         /* ── LAYOUT GRID ── */
@@ -595,40 +740,38 @@ $current_page = 'register_worker';
             </div>
         </header>
 
-        <?php if (!empty($error)): ?>
-            <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
-        <?php endif; ?>
-        <?php if (!empty($success)): ?>
-            <div class="alert alert-success"><?= $success ?></div>
-        <?php endif; ?>
-
         <div class="register-grid">
             <!-- REGISTRATION FORM -->
             <div class="form-card">
                 <h2>Punëtor i Ri</h2>
                 <p class="form-sub">Krijo një llogari të re për stafin, e cila do të lejojë login direkt në panel.</p>
 
-                <form method="POST" action="">
+                <form method="POST" action="" id="registerForm">
                     <input type="hidden" name="action" value="register">
 
                     <div class="field">
                         <label for="full_name">Emri i Plotë</label>
-                        <input type="text" id="full_name" name="full_name" placeholder="p.sh. Dr. Arben Krasniqi">
+                        <input type="text" id="full_name" name="full_name" placeholder="p.sh. Dr. Arben Krasniqi" value="<?= isset($_POST['full_name']) ? htmlspecialchars($_POST['full_name']) : '' ?>">
                     </div>
 
                     <div class="field">
                         <label for="email">Email (opsionale)</label>
-                        <input type="email" id="email" name="email" placeholder="arben@dentcare.com">
+                        <input type="email" id="email" name="email" placeholder="arben@dentcare.com" value="<?= isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '' ?>">
+                    </div>
+
+                    <div class="field">
+                        <label for="phone">Numri i Telefonit (opsionale)</label>
+                        <input type="text" id="phone" name="phone" placeholder="p.sh. 044 123 456" value="<?= isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : '' ?>">
                     </div>
 
                     <div class="field">
                         <label for="username">Username</label>
-                        <input type="text" id="username" name="username" placeholder="arben.k" required autocomplete="off">
+                        <input type="text" id="username" name="username" placeholder="arben.k" required autocomplete="off" value="<?= isset($_POST['username']) ? htmlspecialchars($_POST['username']) : '' ?>">
                     </div>
 
                     <div class="field">
                         <label for="password">Password</label>
-                        <input type="password" id="password" name="password" placeholder="Min. 6 karaktere" required>
+                        <input type="password" id="password" name="password" placeholder="Min. 6 karaktere" required minlength="6">
                         <span class="hint">Punëtori do ta përdorë këtë password për të hyrë në login.php</span>
                     </div>
 
@@ -638,8 +781,14 @@ $current_page = 'register_worker';
 
             <!-- WORKERS LIST -->
             <div class="list-card">
-                <div class="list-card-header">
+                <div class="list-card-header" style="display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;">
                     <h2>Punëtorët Aktual (<?= count($workers) ?>)</h2>
+                    <div class="worker-search-wrapper">
+                        <span class="worker-search-icon">
+                            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        </span>
+                        <input type="text" id="workerSearch" placeholder="Kërko punëtor..." onkeyup="filterWorkers()">
+                    </div>
                 </div>
 
                 <?php if (count($workers) === 0): ?>
@@ -648,11 +797,12 @@ $current_page = 'register_worker';
                         <p>Nuk ka punëtorë të regjistruar ende.</p>
                     </div>
                 <?php else: ?>
-                    <table>
+                    <table id="workersTable">
                         <thead>
                             <tr>
                                 <th>Punëtori</th>
                                 <th>Username</th>
+                                <th>Telefoni</th>
                                 <th>Statusi</th>
                                 <th>Regjistruar</th>
                                 <th>Veprime</th>
@@ -660,12 +810,13 @@ $current_page = 'register_worker';
                         </thead>
                         <tbody>
                             <?php foreach ($workers as $w): ?>
-                            <tr>
+                            <tr data-search="<?= strtolower(htmlspecialchars(($w['full_name'] ?? '') . ' ' . $w['username'] . ' ' . ($w['email'] ?? '') . ' ' . ($w['phone'] ?? ''))) ?>">
                                 <td>
                                     <div class="worker-name"><?= htmlspecialchars($w['full_name'] ?: '—') ?></div>
                                     <div class="worker-meta"><?= htmlspecialchars($w['email'] ?: 'Pa email') ?></div>
                                 </td>
                                 <td><?= htmlspecialchars($w['username']) ?></td>
+                                <td><?= htmlspecialchars($w['phone'] ?: '—') ?></td>
                                 <td>
                                     <?php if ($w['status'] === 'Active'): ?>
                                         <span class="badge badge-confirmed">✓ Aktiv</span>
@@ -683,6 +834,12 @@ $current_page = 'register_worker';
                                 </td>
                             </tr>
                             <?php endforeach; ?>
+                            <tr id="noWorkerResults" style="display:none;">
+                                <td colspan="6" style="text-align:center; padding:40px 20px;">
+                                    <div style="font-size:32px; margin-bottom:8px;">🔍</div>
+                                    <p style="color:var(--text-soft); font-size:14px;">Nuk u gjet asnjë punëtor.</p>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 <?php endif; ?>
