@@ -70,11 +70,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // ── FETCH DATA ──
 try {
     $staffStmt = $pdo->prepare(
-        "SELECT u.id, u.name, u.role, sa.check_in_time, sa.check_out_time
-         FROM users u
-         LEFT JOIN staff_attendance sa ON sa.user_id = u.id AND sa.work_date = :d
-         WHERE u.status = 'Aktiv'
-         ORDER BY u.name ASC"
+        "SELECT u.id, COALESCE(u.full_name, u.username) AS display_name, u.role, sa.check_in_time, sa.check_out_time
+        FROM users u
+        LEFT JOIN staff_attendance sa ON sa.user_id = u.id AND sa.work_date = :d
+        WHERE u.status = 'Active'
+        ORDER BY display_name ASC"
     );
     $staffStmt->execute(['d' => $today]);
     $staff = $staffStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -326,7 +326,7 @@ try {
                         <?php else: foreach ($staff as $s): ?>
                             <tr>
                                 <td>
-                                    <strong><?= htmlspecialchars($s['name']) ?></strong>
+                                    <strong><?= htmlspecialchars($s['display_name']) ?></strong>
                                     <div style="font-size:12px;color:var(--text-soft);"><?= htmlspecialchars($s['role']) ?></div>
                                 </td>
                                 <td>
