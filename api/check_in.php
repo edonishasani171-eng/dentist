@@ -527,7 +527,6 @@ $attendance_history = $historyStmt->fetchAll(PDO::FETCH_ASSOC);
 
             if (noResults) noResults.style.display = visible === 0 ? '' : 'none';
         }
-    </script>
-        
+    </script> 
 </body>
 </html>
