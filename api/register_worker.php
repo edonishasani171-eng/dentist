@@ -1266,12 +1266,12 @@ $current_page = 'register_worker';
         // ── TRIGGER RESULT OVERLAY FROM PHP STATE ──
         document.addEventListener('DOMContentLoaded', function() {
             if (PHP_ERROR && PHP_ERROR.length > 0) {
-                showResult('error', 'Gabim!', PHP_ERROR);
+                setTimeout(() => showResult('error', 'Gabim!', PHP_ERROR), 80);
             }
             if (PHP_SUCCESS && PHP_SUCCESS.length > 0) {
                 const isEdit = PHP_SUCCESS.includes('përditësuan') || PHP_SUCCESS.includes('fshi');
                 const title = isEdit ? 'Ndryshimet u ruajtën!' : 'U regjistrua me sukses!';
-                showResult('success', title, PHP_SUCCESS);
+                setTimeout(() => showResult('success', title, PHP_SUCCESS), 80);
             }
         });
 // ── CUSTOM ROLE DROPDOWN ──
