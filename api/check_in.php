@@ -44,11 +44,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // ── FETCH DATA ──
 try {
     $staffStmt = $pdo->prepare(
-        "SELECT u.id, COALESCE(u.full_name, u.username) AS display_name, u.role, sa.check_in_time, sa.check_out_time
-         FROM users u
-         LEFT JOIN staff_attendance sa ON sa.user_id = u.id AND sa.work_date = :d
-         WHERE u.status = 'Active'
-         ORDER BY display_name ASC"
+        "SELECT * FROM (
+            SELECT DISTINCT ON (u.id)
+                u.id, COALESCE(u.full_name, u.username) AS display_name, u.role,
+                sa.check_in_time, sa.check_out_time
+            FROM users u
+            LEFT JOIN staff_attendance sa ON sa.user_id = u.id AND sa.work_date = :d
+            WHERE u.status = 'Active'
+            ORDER BY u.id, sa.check_in_time DESC NULLS LAST
+        ) latest
+        ORDER BY display_name ASC"
     );
     $staffStmt->execute(['d' => $today]);
     $staff = $staffStmt->fetchAll(PDO::FETCH_ASSOC);
