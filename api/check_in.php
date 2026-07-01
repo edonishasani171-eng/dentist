@@ -41,40 +41,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
-// ── PATIENT ARRIVED ──
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'arrive') {
-    $appointment_id = (int)$_POST['appointment_id'];
-    try {
-        $upd = $pdo->prepare("UPDATE appointments SET arrived = 1 WHERE id = :id");
-        $upd->execute(['id' => $appointment_id]);
-    } catch (PDOException $e) {
-        error_log($e->getMessage());
-    }
-    header("Location: check_in.php");
-    exit;
-}
-
-// ── PATIENT UNDO ARRIVAL ──
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'unarrive') {
-    $appointment_id = (int)$_POST['appointment_id'];
-    try {
-        $upd = $pdo->prepare("UPDATE appointments SET arrived = 0 WHERE id = :id");
-        $upd->execute(['id' => $appointment_id]);
-    } catch (PDOException $e) {
-        error_log($e->getMessage());
-    }
-    header("Location: check_in.php");
-    exit;
-}
-
 // ── FETCH DATA ──
 try {
     $staffStmt = $pdo->prepare(
         "SELECT u.id, COALESCE(u.full_name, u.username) AS display_name, u.role, sa.check_in_time, sa.check_out_time
-        FROM users u
-        LEFT JOIN staff_attendance sa ON sa.user_id = u.id AND sa.work_date = :d
-        WHERE u.status = 'Active'
-        ORDER BY display_name ASC"
+         FROM users u
+         LEFT JOIN staff_attendance sa ON sa.user_id = u.id AND sa.work_date = :d
+         WHERE u.status = 'Active'
+         ORDER BY display_name ASC"
     );
     $staffStmt->execute(['d' => $today]);
     $staff = $staffStmt->fetchAll(PDO::FETCH_ASSOC);
@@ -84,20 +58,15 @@ try {
         if (!empty($s['check_in_time']) && empty($s['check_out_time'])) $present_count++;
     }
 
-    $apptStmt = $pdo->prepare(
-        "SELECT id, patient, service, time, status, arrived
-         FROM appointments
-         WHERE date = :d AND status != 'Cancelled'
-         ORDER BY time ASC"
+    $historyStmt = $pdo->prepare(
+        "SELECT COALESCE(u.full_name, u.username) AS display_name, u.role, sa.check_in_time, sa.check_out_time, sa.work_date
+         FROM staff_attendance sa
+         JOIN users u ON u.id = sa.user_id
+         ORDER BY sa.check_in_time DESC
+         LIMIT 50"
     );
-    $apptStmt->execute(['d' => $today]);
-    $today_appointments = $apptStmt->fetchAll(PDO::FETCH_ASSOC);
-
-    $arrived_count = 0;
-    $waiting_count = 0;
-    foreach ($today_appointments as $a) {
-        if ($a['arrived'] == 1) $arrived_count++; else $waiting_count++;
-    }
+    $historyStmt->execute();
+    $attendance_history = $historyStmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     die("Dështoi leximi i të dhënave: " . $e->getMessage());
 }
@@ -192,7 +161,7 @@ try {
             font-weight: 700; font-size: 12px;
         }
 
-        .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 40px; }
+        .metrics-grid { display: grid; grid-template-columns: minmax(220px, 300px); gap: 20px; margin-bottom: 40px; }
         .card { background: var(--white); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; box-shadow: var(--shadow); }
         .card-meta { font-size: 12px; color: var(--text-soft); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 500; margin-bottom: 8px; }
         .card-value { font-family: 'DM Serif Display', serif; font-size: 32px; }
@@ -298,14 +267,6 @@ try {
                 <div class="card-meta">Stafi Prezent</div>
                 <div class="card-value" style="color: var(--green);"><?= $present_count ?> / <?= count($staff) ?></div>
             </div>
-            <div class="card">
-                <div class="card-meta">Pacientë të Ardhur</div>
-                <div class="card-value" style="color: var(--green);"><?= $arrived_count ?></div>
-            </div>
-            <div class="card">
-                <div class="card-meta">Në Pritje të Ardhjes</div>
-                <div class="card-value" style="color: var(--yellow);"><?= $waiting_count ?></div>
-            </div>
         </div>
 
         <div class="panels">
@@ -359,48 +320,40 @@ try {
                 </table>
             </div>
 
-            <!-- PATIENTS PANEL -->
+            <!-- ATTENDANCE HISTORY PANEL -->
             <div class="panel">
-                <div class="panel-header"><h2>Pacientët e Sotëm</h2></div>
+                <div class="panel-header"><h2>Historiku i Check-Ineve</h2></div>
                 <table>
                     <thead>
                         <tr>
-                            <th>Pacienti</th>
-                            <th>Ora</th>
-                            <th>Ardhja</th>
-                            <th>Veprim</th>
+                            <th>Emri</th>
+                            <th>Roli</th>
+                            <th>Check In</th>
+                            <th>Check Out</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (empty($today_appointments)): ?>
-                            <tr><td colspan="4" class="empty-state"><div>📅</div><p>Nuk ka termine sot.</p></td></tr>
-                        <?php else: foreach ($today_appointments as $a): ?>
+                        <?php if (empty($attendance_history)): ?>
+                            <tr><td colspan="4" class="empty-state"><div>🕒</div><p>Ende s'ka asnjë check-in.</p></td></tr>
+                        <?php else: foreach ($attendance_history as $h): ?>
                             <tr>
                                 <td>
-                                    <strong><?= htmlspecialchars($a['patient']) ?></strong>
-                                    <div style="font-size:12px;color:var(--text-soft);"><?= htmlspecialchars($a['service']) ?></div>
+                                    <strong><?= htmlspecialchars($h['display_name']) ?></strong>
+                                    <div style="font-size:12px;color:var(--text-soft);"><?= date('d M Y', strtotime($h['work_date'])) ?></div>
                                 </td>
-                                <td><?= htmlspecialchars($a['time']) ?></td>
+                                <td><?= htmlspecialchars($h['role']) ?></td>
                                 <td>
-                                    <?php if ($a['arrived'] == 1): ?>
-                                        <span class="badge badge-confirmed">✓ Ka ardhur</span>
+                                    <?php if (!empty($h['check_in_time'])): ?>
+                                        <span class="badge badge-confirmed"><?= date('H:i', strtotime($h['check_in_time'])) ?></span>
                                     <?php else: ?>
-                                        <span class="badge badge-pending">⏳ Në pritje</span>
+                                        <span class="badge badge-out">—</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?php if ($a['arrived'] == 1): ?>
-                                        <form method="POST" style="display:inline;">
-                                            <input type="hidden" name="appointment_id" value="<?= $a['id'] ?>">
-                                            <input type="hidden" name="action" value="unarrive">
-                                            <button type="submit" class="btn btn-secondary">Anulo</button>
-                                        </form>
+                                    <?php if (!empty($h['check_out_time'])): ?>
+                                        <span class="badge badge-out"><?= date('H:i', strtotime($h['check_out_time'])) ?></span>
                                     <?php else: ?>
-                                        <form method="POST" style="display:inline;">
-                                            <input type="hidden" name="appointment_id" value="<?= $a['id'] ?>">
-                                            <input type="hidden" name="action" value="arrive">
-                                            <button type="submit" class="btn btn-approve">Ka Ardhur</button>
-                                        </form>
+                                        <span class="badge badge-pending">Ende në punë</span>
                                     <?php endif; ?>
                                 </td>
                             </tr>
