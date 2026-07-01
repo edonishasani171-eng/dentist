@@ -63,6 +63,18 @@ try {
         if (!empty($s['check_in_time']) && empty($s['check_out_time'])) $present_count++;
     }
 
+    $history_date = $_GET['history_date'] ?? '';
+
+if ($history_date !== '') {
+    $historyStmt = $pdo->prepare(
+        "SELECT COALESCE(u.full_name, u.username) AS display_name, u.role, sa.check_in_time, sa.check_out_time, sa.work_date
+         FROM staff_attendance sa
+         JOIN users u ON u.id = sa.user_id
+         WHERE sa.work_date = :hd
+         ORDER BY sa.check_in_time DESC"
+    );
+    $historyStmt->execute(['hd' => $history_date]);
+} else {
     $historyStmt = $pdo->prepare(
         "SELECT COALESCE(u.full_name, u.username) AS display_name, u.role, sa.check_in_time, sa.check_out_time, sa.work_date
          FROM staff_attendance sa
@@ -71,7 +83,8 @@ try {
          LIMIT 50"
     );
     $historyStmt->execute();
-    $attendance_history = $historyStmt->fetchAll(PDO::FETCH_ASSOC);
+}
+$attendance_history = $historyStmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     die("Dështoi leximi i të dhënave: " . $e->getMessage());
 }
@@ -203,6 +216,79 @@ try {
             .metrics-grid { grid-template-columns: repeat(1, 1fr); }
             .panels { grid-template-columns: 1fr; }
         }
+        .history-filters {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .history-search-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .history-search-wrapper input {
+            width: 100%;
+            padding: 9px 12px 9px 34px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+            outline: none;
+            background: var(--white);
+            color: var(--text);
+        }
+
+        .history-search-wrapper input:focus {
+            border-color: var(--green);
+            box-shadow: 0 0 0 3px rgba(26, 122, 94, 0.15);
+        }
+
+        .history-search-wrapper .search-icon {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .history-date-input {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--white);
+            color: var(--text);
+            outline: none;
+        }
+
+        .history-date-input:focus {
+            border-color: var(--green);
+        }
+
+        .history-date-clear {
+            font-size: 12px;
+            color: var(--text-soft);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .history-date-clear:hover {
+            color: var(--red);
+        }
+
+        .table-scroll {
+            max-height: 480px;
+            overflow-y: auto;
+        }
+
+        .table-scroll thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
     </style>
 </head>
 <body>
@@ -328,45 +414,88 @@ try {
             <!-- ATTENDANCE HISTORY PANEL -->
             <div class="panel">
                 <div class="panel-header"><h2>Historiku i Check-Ineve</h2></div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Emri</th>
-                            <th>Roli</th>
-                            <th>Check In</th>
-                            <th>Check Out</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($attendance_history)): ?>
-                            <tr><td colspan="4" class="empty-state"><div>🕒</div><p>Ende s'ka asnjë check-in.</p></td></tr>
-                        <?php else: foreach ($attendance_history as $h): ?>
+
+                <div class="history-filters">
+                    <div class="history-search-wrapper">
+                        <span class="search-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-soft)" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        </span>
+                        <input type="text" id="historySearch" placeholder="Kerko me emer..." onkeyup="filterHistoryTable()">
+                    </div>
+                    <form method="GET" style="display:flex; align-items:center; gap:8px;">
+                        <input type="date" name="history_date" class="history-date-input" value="<?= htmlspecialchars($history_date) ?>" onchange="this.form.submit()">
+                        <?php if ($history_date !== ''): ?>
+                            <a href="check_in.php" class="history-date-clear">Pastro</a>
+                        <?php endif; ?>
+                    </form>
+                </div>
+
+                <div class="table-scroll">
+                    <table id="historyTable">
+                        <thead>
                             <tr>
-                                <td>
-                                    <strong><?= htmlspecialchars($h['display_name']) ?></strong>
-                                    <div style="font-size:12px;color:var(--text-soft);"><?= date('d M Y', strtotime($h['work_date'])) ?></div>
-                                </td>
-                                <td><?= htmlspecialchars($h['role']) ?></td>
-                                <td>
-                                    <?php if (!empty($h['check_in_time'])): ?>
-                                        <span class="badge badge-confirmed"><?= date('H:i', strtotime($h['check_in_time'])) ?></span>
-                                    <?php else: ?>
-                                        <span class="badge badge-out">—</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
-                                    <?php if (!empty($h['check_out_time'])): ?>
-                                        <span class="badge badge-out"><?= date('H:i', strtotime($h['check_out_time'])) ?></span>
-                                    <?php else: ?>
-                                        <span class="badge badge-pending">Ende në punë</span>
-                                    <?php endif; ?>
-                                </td>
+                                <th>Emri</th>
+                                <th>Roli</th>
+                                <th>Check In</th>
+                                <th>Check Out</th>
                             </tr>
-                        <?php endforeach; endif; ?>
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            <?php if (empty($attendance_history)): ?>
+                                <tr><td colspan="4" class="empty-state"><div>🕒</div><p>Ende s'ka asnjë check-in.</p></td></tr>
+                            <?php else: foreach ($attendance_history as $h): ?>
+                                <tr data-search="<?= strtolower(htmlspecialchars($h['display_name'])) ?>">
+                                    <td>
+                                        <strong><?= htmlspecialchars($h['display_name']) ?></strong>
+                                        <div style="font-size:12px;color:var(--text-soft);"><?= date('d M Y', strtotime($h['work_date'])) ?></div>
+                                    </td>
+                                    <td><?= htmlspecialchars($h['role']) ?></td>
+                                    <td>
+                                        <?php if (!empty($h['check_in_time'])): ?>
+                                            <span class="badge badge-confirmed"><?= date('H:i', strtotime($h['check_in_time'])) ?></span>
+                                        <?php else: ?>
+                                            <span class="badge badge-out">—</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <?php if (!empty($h['check_out_time'])): ?>
+                                            <span class="badge badge-out"><?= date('H:i', strtotime($h['check_out_time'])) ?></span>
+                                        <?php else: ?>
+                                            <span class="badge badge-pending">Ende në punë</span>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                                <tr id="noHistoryResults" style="display:none;">
+                                    <td colspan="4" class="empty-state"><div>🔍</div><p>Nuk u gjet asnjë rezultat.</p></td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>
+    <script>
+        function filterHistoryTable() {
+            const filter = document.getElementById('historySearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#historyTable tbody tr:not(#noHistoryResults)');
+            const noResults = document.getElementById('noHistoryResults');
+            let visible = 0;
+
+            rows.forEach(row => {
+                const searchVal = row.getAttribute('data-search') || '';
+                if (searchVal.includes(filter)) {
+                    row.style.display = '';
+                    visible++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (noResults) noResults.style.display = visible === 0 ? '' : 'none';
+        }
+    </script>
+        
 </body>
 </html>
