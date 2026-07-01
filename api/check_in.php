@@ -391,6 +391,7 @@ $attendance_history = $historyStmt->fetchAll(PDO::FETCH_ASSOC);
                                     <strong><?= htmlspecialchars($s['display_name']) ?></strong>
                                     <div style="font-size:12px;color:var(--text-soft);"><?= htmlspecialchars($s['role']) ?></div>
                                 </td>
+                                <td>
                                     <?php if (!empty($s['check_in_time']) && empty($s['check_out_time'])): ?>
                                         <span class="badge badge-confirmed">✓ Në punë · <?= date('H:i', strtotime($s['check_in_time'])) ?></span>
                                     <?php elseif (!empty($s['check_out_time'])): ?>
