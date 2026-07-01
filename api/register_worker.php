@@ -862,7 +862,8 @@ $current_page = 'register_worker';
                         <p>Nuk ka punëtorë të regjistruar ende.</p>
                     </div>
                 <?php else: ?>
-                    <table id="workersTable">
+                    <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+                    <table id="workersTable" style="min-width:640px;">
                         <thead>
                             <tr>
                                 <th>Punëtori</th>
@@ -920,6 +921,7 @@ $current_page = 'register_worker';
                             </tr>
                         </tbody>
                     </table>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
