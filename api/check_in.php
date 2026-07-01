@@ -364,7 +364,17 @@ $attendance_history = $historyStmt->fetchAll(PDO::FETCH_ASSOC);
             <!-- STAFF PANEL -->
             <div class="panel">
                 <div class="panel-header"><h2>Stafi</h2></div>
-                <table>
+
+                <div class="history-filters">
+                    <div class="history-search-wrapper">
+                        <span class="search-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-soft)" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        </span>
+                        <input type="text" id="staffSearch" placeholder="Kerko me emer..." onkeyup="filterStaffTable()">
+                    </div>
+                </div>
+
+                <table id="staffTable">
                     <thead>
                         <tr>
                             <th>Emri</th>
@@ -376,12 +386,11 @@ $attendance_history = $historyStmt->fetchAll(PDO::FETCH_ASSOC);
                         <?php if (empty($staff)): ?>
                             <tr><td colspan="3" class="empty-state"><div>👥</div><p>Nuk ka staf aktiv.</p></td></tr>
                         <?php else: foreach ($staff as $s): ?>
-                            <tr>
+                            <tr data-search="<?= strtolower(htmlspecialchars($s['display_name'] . ' ' . $s['role'])) ?>">
                                 <td>
                                     <strong><?= htmlspecialchars($s['display_name']) ?></strong>
                                     <div style="font-size:12px;color:var(--text-soft);"><?= htmlspecialchars($s['role']) ?></div>
                                 </td>
-                                <td>
                                     <?php if (!empty($s['check_in_time']) && empty($s['check_out_time'])): ?>
                                         <span class="badge badge-confirmed">✓ Në punë · <?= date('H:i', strtotime($s['check_in_time'])) ?></span>
                                     <?php elseif (!empty($s['check_out_time'])): ?>
@@ -406,7 +415,11 @@ $attendance_history = $historyStmt->fetchAll(PDO::FETCH_ASSOC);
                                     <?php endif; ?>
                                 </td>
                             </tr>
-                        <?php endforeach; endif; ?>
+                        <?php endforeach; ?>
+                            <tr id="noStaffResults" style="display:none;">
+                                <td colspan="3" class="empty-state"><div>🔍</div><p>Nuk u gjet asnjë rezultat.</p></td>
+                            </tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -481,6 +494,24 @@ $attendance_history = $historyStmt->fetchAll(PDO::FETCH_ASSOC);
             const filter = document.getElementById('historySearch').value.toLowerCase();
             const rows = document.querySelectorAll('#historyTable tbody tr:not(#noHistoryResults)');
             const noResults = document.getElementById('noHistoryResults');
+            let visible = 0;
+
+            rows.forEach(row => {
+                const searchVal = row.getAttribute('data-search') || '';
+                if (searchVal.includes(filter)) {
+                    row.style.display = '';
+                    visible++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (noResults) noResults.style.display = visible === 0 ? '' : 'none';
+        }
+        function filterStaffTable() {
+            const filter = document.getElementById('staffSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#staffTable tbody tr:not(#noStaffResults)');
+            const noResults = document.getElementById('noStaffResults');
             let visible = 0;
 
             rows.forEach(row => {
