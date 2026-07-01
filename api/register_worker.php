@@ -94,7 +94,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     }
 }
 
-// ── FETCH ALL WORKERS (role = staff) ──
+// ── HANDLE: EDIT WORKER ──
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'edit_worker') {
+    $target_id  = (int)($_POST['user_id'] ?? 0);
+    $username   = trim($_POST['username'] ?? '');
+    $full_name  = trim($_POST['full_name'] ?? '');
+    $email      = trim($_POST['email'] ?? '');
+    $phone      = trim($_POST['phone'] ?? '');
+    $password   = trim($_POST['password'] ?? '');
+
+    if (empty($username)) {
+        $error = "Username nuk mund të jetë bosh!";
+    } elseif (!empty($password) && strlen($password) < 6) {
+        $error = "Fjalëkalimi i ri duhet të ketë të paktën 6 karaktere!";
+    } else {
+        try {
+            if (!empty($password)) {
+                $hashed = password_hash($password, PASSWORD_DEFAULT);
+                $stmt = $pdo->prepare(
+                    "UPDATE users SET username=:username, full_name=:full_name, email=:email, phone=:phone, password=:password, updated_at=CURRENT_TIMESTAMP WHERE id=:id AND role='staff'"
+                );
+                $stmt->execute([
+                    'username'  => $username,
+                    'full_name' => $full_name !== '' ? $full_name : null,
+                    'email'     => $email !== '' ? $email : null,
+                    'phone'     => $phone !== '' ? $phone : null,
+                    'password'  => $hashed,
+                    'id'        => $target_id,
+                ]);
+            } else {
+                try {
+                    $stmt = $pdo->prepare(
+                        "UPDATE users SET username=:username, full_name=:full_name, email=:email, phone=:phone, updated_at=CURRENT_TIMESTAMP WHERE id=:id AND role='staff'"
+                    );
+                    $stmt->execute([
+                        'username'  => $username,
+                        'full_name' => $full_name !== '' ? $full_name : null,
+                        'email'     => $email !== '' ? $email : null,
+                        'phone'     => $phone !== '' ? $phone : null,
+                        'id'        => $target_id,
+                    ]);
+                } catch (PDOException $colErr) {
+                    // Fallback without phone column
+                    $stmt = $pdo->prepare(
+                        "UPDATE users SET username=:username, full_name=:full_name, email=:email, updated_at=CURRENT_TIMESTAMP WHERE id=:id AND role='staff'"
+                    );
+                    $stmt->execute([
+                        'username'  => $username,
+                        'full_name' => $full_name !== '' ? $full_name : null,
+                        'email'     => $email !== '' ? $email : null,
+                        'id'        => $target_id,
+                    ]);
+                }
+            }
+            $success = "Të dhënat e punëtorit u përditësuan me sukses!";
+        } catch (PDOException $e) {
+            $error = "Gabim gjatë përditësimit: " . $e->getMessage();
+        }
+    }
+}
+
+
 try {
     $workers_stmt = $pdo->query(
         "SELECT id, username, full_name, email, phone, status, created_at
@@ -749,24 +809,29 @@ $current_page = 'register_worker';
                 <form method="POST" action="" id="registerForm">
                     <input type="hidden" name="action" value="register">
 
+                    <?php
+                        // Only repopulate fields when there was an error (preserve user input).
+                        // On success, all fields are cleared so the form is ready for the next entry.
+                        $keep = !empty($error) && ($_POST['action'] ?? '') === 'register';
+                    ?>
                     <div class="field">
                         <label for="full_name">Emri i Plotë</label>
-                        <input type="text" id="full_name" name="full_name" placeholder="p.sh. Dr. Arben Krasniqi" value="<?= isset($_POST['full_name']) ? htmlspecialchars($_POST['full_name']) : '' ?>">
+                        <input type="text" id="full_name" name="full_name" placeholder="p.sh. Dr. Arben Krasniqi" value="<?= $keep ? htmlspecialchars($_POST['full_name'] ?? '') : '' ?>">
                     </div>
 
                     <div class="field">
                         <label for="email">Email (opsionale)</label>
-                        <input type="email" id="email" name="email" placeholder="arben@dentcare.com" value="<?= isset($_POST['email']) ? htmlspecialchars($_POST['email']) : '' ?>">
+                        <input type="email" id="email" name="email" placeholder="arben@dentcare.com" value="<?= $keep ? htmlspecialchars($_POST['email'] ?? '') : '' ?>">
                     </div>
 
                     <div class="field">
                         <label for="phone">Numri i Telefonit (opsionale)</label>
-                        <input type="text" id="phone" name="phone" placeholder="p.sh. 044 123 456" value="<?= isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : '' ?>">
+                        <input type="text" id="phone" name="phone" placeholder="p.sh. 044 123 456" value="<?= $keep ? htmlspecialchars($_POST['phone'] ?? '') : '' ?>">
                     </div>
 
                     <div class="field">
                         <label for="username">Username</label>
-                        <input type="text" id="username" name="username" placeholder="arben.k" required autocomplete="off" value="<?= isset($_POST['username']) ? htmlspecialchars($_POST['username']) : '' ?>">
+                        <input type="text" id="username" name="username" placeholder="arben.k" required autocomplete="off" value="<?= $keep ? htmlspecialchars($_POST['username'] ?? '') : '' ?>">
                     </div>
 
                     <div class="field">
@@ -826,11 +891,24 @@ $current_page = 'register_worker';
                                 </td>
                                 <td><?= !empty($w['created_at']) ? date('M d, Y', strtotime($w['created_at'])) : '—' ?></td>
                                 <td>
-                                    <form id="delete-worker-form-<?= $w['id'] ?>" method="POST" action="" style="display:inline;">
-                                        <input type="hidden" name="user_id" value="<?= $w['id'] ?>">
-                                        <input type="hidden" name="action" value="delete_worker">
-                                        <button type="button" class="btn-delete-worker" onclick="triggerDeleteConfirm(<?= $w['id'] ?>, '<?= htmlspecialchars(addslashes($w['full_name'] ?: $w['username'])) ?>')">Fshije</button>
-                                    </form>
+                                    <div style="display:flex; gap:6px; align-items:center;">
+                                        <button type="button"
+                                            style="padding:6px 12px; border-radius:var(--radius-sm); font-size:13px; font-weight:500; cursor:pointer; border:1px solid var(--border); background:var(--cream); color:var(--text-mid); transition:background .2s;"
+                                            onmouseover="this.style.background='var(--green-light)';this.style.color='var(--green-dark)';"
+                                            onmouseout="this.style.background='var(--cream)';this.style.color='var(--text-mid)';"
+                                            onclick="openEditModal(
+                                                <?= $w['id'] ?>,
+                                                '<?= htmlspecialchars(addslashes($w['full_name'] ?? '')) ?>',
+                                                '<?= htmlspecialchars(addslashes($w['email'] ?? '')) ?>',
+                                                '<?= htmlspecialchars(addslashes($w['phone'] ?? '')) ?>',
+                                                '<?= htmlspecialchars(addslashes($w['username'])) ?>'
+                                            )">Ndrysho</button>
+                                        <form id="delete-worker-form-<?= $w['id'] ?>" method="POST" action="" style="display:inline;">
+                                            <input type="hidden" name="user_id" value="<?= $w['id'] ?>">
+                                            <input type="hidden" name="action" value="delete_worker">
+                                            <button type="button" class="btn-delete-worker" onclick="triggerDeleteConfirm(<?= $w['id'] ?>, '<?= htmlspecialchars(addslashes($w['full_name'] ?: $w['username'])) ?>')">Fshije</button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -847,12 +925,22 @@ $current_page = 'register_worker';
         </div>
     </main>
 
-    <!-- DELETE CONFIRM MODAL -->
+    <!-- ── FULLSCREEN RESULT OVERLAY ── -->
+    <div id="resultOverlay" class="result-overlay">
+        <div class="result-box" id="resultBox">
+            <div class="result-icon" id="resultIcon"></div>
+            <h2 id="resultTitle"></h2>
+            <p id="resultMessage"></p>
+            <button onclick="closeResultOverlay()">Vazhdo</button>
+        </div>
+    </div>
+
+    <!-- ── DELETE CONFIRM MODAL ── -->
     <div id="confirmModal" class="modal-overlay">
         <div class="modal-box">
             <div class="icon">🗑️</div>
             <h3>Fshi Punëtorin?</h3>
-            <p id="confirmMessage">A jeni i sigurt që dëshironi të fshini këtë punëtor? Kjo veprim nuk mund të kthehet.</p>
+            <p id="confirmMessage">A jeni i sigurt që dëshironi të fshini këtë punëtor?</p>
             <div class="modal-actions">
                 <button type="button" class="btn-no" onclick="closeConfirmModal()">Jo</button>
                 <button type="button" class="btn-yes" id="confirmDeleteBtn">Po, Fshije</button>
@@ -860,7 +948,77 @@ $current_page = 'register_worker';
         </div>
     </div>
 
+    <!-- ── EDIT WORKER MODAL ── -->
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-box" style="max-width:480px; text-align:left; padding:28px 32px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding-bottom:16px; border-bottom:1px solid var(--border);">
+                <h3 style="font-family:'DM Serif Display',serif; font-size:20px;">Ndrysho Punëtorin</h3>
+                <button onclick="closeEditModal()" style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--text-soft); line-height:1;">&times;</button>
+            </div>
+            <form method="POST" action="" id="editForm">
+                <input type="hidden" name="action" value="edit_worker">
+                <input type="hidden" name="user_id" id="edit_user_id">
+
+                <div class="field" style="margin-bottom:14px;">
+                    <label for="edit_full_name">Emri i Plotë</label>
+                    <input type="text" id="edit_full_name" name="full_name" placeholder="Dr. Arben Krasniqi">
+                </div>
+                <div class="field" style="margin-bottom:14px;">
+                    <label for="edit_email">Email</label>
+                    <input type="email" id="edit_email" name="email" placeholder="arben@dentcare.com">
+                </div>
+                <div class="field" style="margin-bottom:14px;">
+                    <label for="edit_phone">Numri i Telefonit</label>
+                    <input type="text" id="edit_phone" name="phone" placeholder="044 123 456">
+                </div>
+                <div class="field" style="margin-bottom:14px;">
+                    <label for="edit_username">Username</label>
+                    <input type="text" id="edit_username" name="username" required>
+                </div>
+                <div class="field" style="margin-bottom:20px;">
+                    <label for="edit_password">Password i Ri (lër bosh për të mos ndryshuar)</label>
+                    <input type="password" id="edit_password" name="password" placeholder="Min. 6 karaktere">
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:10px;">
+                    <button type="button" onclick="closeEditModal()" style="padding:10px 20px; border-radius:8px; border:1px solid var(--border); background:var(--cream); color:var(--text-mid); cursor:pointer; font-size:14px; font-weight:500;">Anulo</button>
+                    <button type="submit" style="padding:10px 20px; border-radius:8px; border:none; background:var(--green); color:white; cursor:pointer; font-size:14px; font-weight:500;">Ruaj Ndryshimet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        // ── PHP STATE PASSED TO JS ──
+        const PHP_ERROR   = <?= json_encode($error) ?>;
+        const PHP_SUCCESS = <?= json_encode($success) ?>;
+
+        // ── RESULT OVERLAY ──
+        function showResult(type, title, message) {
+            const overlay = document.getElementById('resultOverlay');
+            const box     = document.getElementById('resultBox');
+            const icon    = document.getElementById('resultIcon');
+            document.getElementById('resultTitle').innerText   = title;
+            document.getElementById('resultMessage').innerText = message;
+
+            if (type === 'success') {
+                icon.innerHTML  = '✓';
+                icon.className  = 'result-icon success';
+                icon.style.cssText = 'color:var(--green); font-size:34px; font-weight:700;';
+                box.classList.remove('is-error');
+            } else {
+                icon.innerHTML  = '✕';
+                icon.className  = 'result-icon error';
+                icon.style.cssText = 'color:var(--red); font-size:34px; font-weight:700;';
+                box.classList.add('is-error');
+            }
+            overlay.classList.add('active');
+        }
+
+        function closeResultOverlay() {
+            document.getElementById('resultOverlay').classList.remove('active');
+        }
+
+        // ── DELETE CONFIRM ──
         let targetForm = null;
 
         function triggerDeleteConfirm(workerId, workerName) {
@@ -879,10 +1037,53 @@ $current_page = 'register_worker';
             if (targetForm) targetForm.submit();
         };
 
-        window.onclick = function(event) {
-            const overlay = document.getElementById('confirmModal');
-            if (event.target === overlay) closeConfirmModal();
+        // ── EDIT MODAL ──
+        function openEditModal(id, fullName, email, phone, username) {
+            document.getElementById('edit_user_id').value   = id;
+            document.getElementById('edit_full_name').value = fullName;
+            document.getElementById('edit_email').value     = email;
+            document.getElementById('edit_phone').value     = phone;
+            document.getElementById('edit_username').value  = username;
+            document.getElementById('edit_password').value  = '';
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        // ── WORKER SEARCH ──
+        function filterWorkers() {
+            const filter = document.getElementById('workerSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#workersTable tbody tr:not(#noWorkerResults)');
+            const noResults = document.getElementById('noWorkerResults');
+            let visible = 0;
+
+            rows.forEach(row => {
+                const val = row.getAttribute('data-search') || '';
+                if (val.includes(filter)) { row.style.display = ''; visible++; }
+                else { row.style.display = 'none'; }
+            });
+
+            if (noResults) noResults.style.display = visible === 0 ? '' : 'none';
+        }
+
+        // ── CLOSE OVERLAYS ON BACKDROP CLICK ──
+        window.onclick = function(e) {
+            if (e.target === document.getElementById('confirmModal')) closeConfirmModal();
+            if (e.target === document.getElementById('editModal'))    closeEditModal();
+            if (e.target === document.getElementById('resultOverlay')) closeResultOverlay();
         };
+
+        // ── TRIGGER RESULT OVERLAY FROM PHP STATE ──
+        document.addEventListener('DOMContentLoaded', function() {
+            if (PHP_ERROR && PHP_ERROR.length > 0) {
+                showResult('error', 'Gabim!', PHP_ERROR);
+            }
+            if (PHP_SUCCESS && PHP_SUCCESS.length > 0) {
+                showResult('success', 'U regjistrua me sukses!', PHP_SUCCESS);
+            }
+        });
     </script>
 </body>
 </html>
