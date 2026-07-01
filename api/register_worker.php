@@ -1127,13 +1127,31 @@ $current_page = 'register_worker';
                     <input type="text" id="edit_phone" name="phone" placeholder="044 123 456">
                 </div>
                 <div class="field" style="margin-bottom:14px;">
-                    <label for="edit_role">Roli</label>
-                    <select id="edit_role" name="role">
-                        <option value="staff">Staff</option>
-                        <option value="dentist">Dentist</option>
-                        <option value="receptionist">Receptionist</option>
-                        <option value="manager">Manager</option>
-                    </select>
+                    <label>Roli</label>
+                    <div class="custom-select-wrapper" id="editRoleSelectWrapper">
+                        <input type="hidden" name="role" id="editRoleHiddenInput" value="staff">
+                        <div class="custom-select-trigger" onclick="toggleEditRoleDropdown()">
+                            <span id="editRoleSelectedLabel">Staff</span>
+                            <svg class="custom-select-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                        </div>
+                        <div class="custom-select-dropdown">
+                            <div class="custom-select-option" data-value="staff" onclick="selectEditRole(this)">
+                                <span class="role-dot" style="background:#6c757d;"></span> Staff
+                            </div>
+                            <div class="custom-select-option" data-value="dentist" onclick="selectEditRole(this)">
+                                <span class="role-dot" style="background:var(--green);"></span> Dentist
+                            </div>
+                            <div class="custom-select-option" data-value="receptionist" onclick="selectEditRole(this)">
+                                <span class="role-dot" style="background:var(--yellow);"></span> Receptionist
+                            </div>
+                            <div class="custom-select-option" data-value="manager" onclick="selectEditRole(this)">
+                                <span class="role-dot" style="background:#5b4fcf;"></span> Manager
+                            </div>
+                            <div class="custom-select-option" data-value="admin" onclick="selectEditRole(this)">
+                                <span class="role-dot" style="background:#c0392b;"></span> Admin
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="field" style="margin-bottom:14px;">
                     <label for="edit_username">Username</label>
@@ -1203,13 +1221,18 @@ $current_page = 'register_worker';
 
         // ── EDIT MODAL ──
         function openEditModal(id, fullName, email, phone, username, role) {
-            document.getElementById('edit_user_id').value   = id;
+            document.getElementById('edit_user_id').value = id;
             document.getElementById('edit_full_name').value = fullName;
-            document.getElementById('edit_email').value     = email;
-            document.getElementById('edit_phone').value     = phone;
-            document.getElementById('edit_username').value  = username;
-            document.getElementById('edit_password').value  = '';
-            document.getElementById('edit_role').value      = role || 'staff';
+            document.getElementById('edit_email').value = email;
+            document.getElementById('edit_phone').value = phone;
+            document.getElementById('edit_username').value = username;
+            document.getElementById('edit_password').value = '';
+            const editRole = role || 'staff';
+            document.getElementById('editRoleHiddenInput').value = editRole;
+            document.getElementById('editRoleSelectedLabel').textContent = roleMeta[editRole]?.label || editRole;
+            document.querySelectorAll('#editRoleSelectWrapper .custom-select-option').forEach(o => o.classList.remove('selected'));
+            const editMatch = document.querySelector(`#editRoleSelectWrapper [data-value="${editRole}"]`);
+            if (editMatch) editMatch.classList.add('selected');
             document.getElementById('editModal').classList.add('active');
         }
 
@@ -1246,7 +1269,9 @@ $current_page = 'register_worker';
                 showResult('error', 'Gabim!', PHP_ERROR);
             }
             if (PHP_SUCCESS && PHP_SUCCESS.length > 0) {
-                showResult('success', 'U regjistrua me sukses!', PHP_SUCCESS);
+                const isEdit = PHP_SUCCESS.includes('përditësuan') || PHP_SUCCESS.includes('fshi');
+                const title = isEdit ? 'Ndryshimet u ruajtën!' : 'U regjistrua me sukses!';
+                showResult('success', title, PHP_SUCCESS);
             }
         });
 // ── CUSTOM ROLE DROPDOWN ──
@@ -1270,7 +1295,18 @@ function selectRole(el) {
     el.classList.add('selected');
     document.getElementById('roleSelectWrapper').classList.remove('open');
 }
+function toggleEditRoleDropdown() {
+    document.getElementById('editRoleSelectWrapper').classList.toggle('open');
+}
 
+function selectEditRole(el) {
+    const value = el.getAttribute('data-value');
+    document.getElementById('editRoleHiddenInput').value = value;
+    document.getElementById('editRoleSelectedLabel').textContent = roleMeta[value]?.label || value;
+    document.querySelectorAll('#editRoleSelectWrapper .custom-select-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('editRoleSelectWrapper').classList.remove('open');
+}
 // Set initial selected state from hidden input value on page load
 document.addEventListener('DOMContentLoaded', function() {
     const initial = document.getElementById('roleHiddenInput')?.value || 'staff';
@@ -1284,6 +1320,10 @@ document.addEventListener('click', function(e) {
     const wrapper = document.getElementById('roleSelectWrapper');
     if (wrapper && !wrapper.contains(e.target)) {
         wrapper.classList.remove('open');
+    }
+    const editWrapper = document.getElementById('editRoleSelectWrapper');
+    if (editWrapper && !editWrapper.contains(e.target)) {
+        editWrapper.classList.remove('open');
     }
 });
     </script>
