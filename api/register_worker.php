@@ -26,6 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $full_name = trim($_POST['full_name'] ?? '');
     $email     = trim($_POST['email'] ?? '');
     $phone     = trim($_POST['phone'] ?? '');
+    $allowed_roles = ['staff', 'dentist', 'receptionist', 'manager'];
+    $role      = in_array(trim($_POST['role'] ?? ''), $allowed_roles) ? trim($_POST['role']) : 'staff';
 
     if (empty($username) || empty($password)) {
         $error = "Ju lutem plotësoni Username dhe Password!";
@@ -45,11 +47,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 try {
                     $insert_stmt = $pdo->prepare(
                         "INSERT INTO users (username, password, role, status, email, full_name, phone)
-                         VALUES (:username, :password, 'staff', 'Active', :email, :full_name, :phone)"
+                         VALUES (:username, :password, :role, 'Active', :email, :full_name, :phone)"
                     );
                     $insert_stmt->execute([
                         'username'  => $username,
                         'password'  => $hashed_password,
+                        'role'      => $role,
                         'email'     => $email !== '' ? $email : null,
                         'full_name' => $full_name !== '' ? $full_name : null,
                         'phone'     => $phone !== '' ? $phone : null,
@@ -58,11 +61,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     // Fallback in case the 'phone' column doesn't exist yet in the users table
                     $insert_stmt = $pdo->prepare(
                         "INSERT INTO users (username, password, role, status, email, full_name)
-                         VALUES (:username, :password, 'staff', 'Active', :email, :full_name)"
+                         VALUES (:username, :password, :role, 'Active', :email, :full_name)"
                     );
                     $insert_stmt->execute([
                         'username'  => $username,
                         'password'  => $hashed_password,
+                        'role'      => $role,
                         'email'     => $email !== '' ? $email : null,
                         'full_name' => $full_name !== '' ? $full_name : null,
                     ]);
@@ -102,6 +106,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $email      = trim($_POST['email'] ?? '');
     $phone      = trim($_POST['phone'] ?? '');
     $password   = trim($_POST['password'] ?? '');
+    $edit_allowed_roles = ['staff', 'dentist', 'receptionist', 'manager'];
+    $edit_role  = in_array(trim($_POST['role'] ?? ''), $edit_allowed_roles) ? trim($_POST['role']) : 'staff';
 
     if (empty($username)) {
         $error = "Username nuk mund të jetë bosh!";
@@ -112,37 +118,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             if (!empty($password)) {
                 $hashed = password_hash($password, PASSWORD_DEFAULT);
                 $stmt = $pdo->prepare(
-                    "UPDATE users SET username=:username, full_name=:full_name, email=:email, phone=:phone, password=:password, updated_at=CURRENT_TIMESTAMP WHERE id=:id AND role='staff'"
+                    "UPDATE users SET username=:username, full_name=:full_name, email=:email, phone=:phone, role=:role, password=:password, updated_at=CURRENT_TIMESTAMP WHERE id=:id AND role!='admin'"
                 );
                 $stmt->execute([
                     'username'  => $username,
                     'full_name' => $full_name !== '' ? $full_name : null,
                     'email'     => $email !== '' ? $email : null,
                     'phone'     => $phone !== '' ? $phone : null,
+                    'role'      => $edit_role,
                     'password'  => $hashed,
                     'id'        => $target_id,
                 ]);
             } else {
                 try {
                     $stmt = $pdo->prepare(
-                        "UPDATE users SET username=:username, full_name=:full_name, email=:email, phone=:phone, updated_at=CURRENT_TIMESTAMP WHERE id=:id AND role='staff'"
+                        "UPDATE users SET username=:username, full_name=:full_name, email=:email, phone=:phone, role=:role, updated_at=CURRENT_TIMESTAMP WHERE id=:id AND role!='admin'"
                     );
                     $stmt->execute([
                         'username'  => $username,
                         'full_name' => $full_name !== '' ? $full_name : null,
                         'email'     => $email !== '' ? $email : null,
                         'phone'     => $phone !== '' ? $phone : null,
+                        'role'      => $edit_role,
                         'id'        => $target_id,
                     ]);
                 } catch (PDOException $colErr) {
-                    // Fallback without phone column
                     $stmt = $pdo->prepare(
-                        "UPDATE users SET username=:username, full_name=:full_name, email=:email, updated_at=CURRENT_TIMESTAMP WHERE id=:id AND role='staff'"
+                        "UPDATE users SET username=:username, full_name=:full_name, email=:email, role=:role, updated_at=CURRENT_TIMESTAMP WHERE id=:id AND role!='admin'"
                     );
                     $stmt->execute([
                         'username'  => $username,
                         'full_name' => $full_name !== '' ? $full_name : null,
                         'email'     => $email !== '' ? $email : null,
+                        'role'      => $edit_role,
                         'id'        => $target_id,
                     ]);
                 }
@@ -157,9 +165,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 try {
     $workers_stmt = $pdo->query(
-        "SELECT id, username, full_name, email, phone, status, created_at
+        "SELECT id, username, full_name, email, phone, role, status, created_at
          FROM users
-         WHERE role = 'staff'
+         WHERE role != 'admin'
          ORDER BY id DESC"
     );
     $workers = $workers_stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -167,9 +175,9 @@ try {
     // Fallback if 'phone' column doesn't exist
     try {
         $workers_stmt = $pdo->query(
-            "SELECT id, username, full_name, email, status, created_at
+            "SELECT id, username, full_name, email, role, status, created_at
              FROM users
-             WHERE role = 'staff'
+             WHERE role != 'admin'
              ORDER BY id DESC"
         );
         $workers = $workers_stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -548,7 +556,8 @@ $current_page = 'register_worker';
 
         input[type="text"],
         input[type="email"],
-        input[type="password"] {
+        input[type="password"],
+        select {
             padding: 11px 14px;
             background: var(--cream);
             border: 1px solid var(--border);
@@ -830,6 +839,16 @@ $current_page = 'register_worker';
                     </div>
 
                     <div class="field">
+                        <label for="role">Roli</label>
+                        <select id="role" name="role">
+                            <option value="staff" <?= ($keep && ($_POST['role'] ?? '') === 'staff') ? 'selected' : '' ?>>Staff</option>
+                            <option value="dentist" <?= ($keep && ($_POST['role'] ?? '') === 'dentist') ? 'selected' : '' ?>>Dentist</option>
+                            <option value="receptionist" <?= ($keep && ($_POST['role'] ?? '') === 'receptionist') ? 'selected' : '' ?>>Receptionist</option>
+                            <option value="manager" <?= ($keep && ($_POST['role'] ?? '') === 'manager') ? 'selected' : '' ?>>Manager</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
                         <label for="username">Username</label>
                         <input type="text" id="username" name="username" placeholder="arben.k" required autocomplete="off" value="<?= $keep ? htmlspecialchars($_POST['username'] ?? '') : '' ?>">
                     </div>
@@ -868,6 +887,7 @@ $current_page = 'register_worker';
                             <tr>
                                 <th>Punëtori</th>
                                 <th>Username</th>
+                                <th>Roli</th>
                                 <th>Telefoni</th>
                                 <th>Statusi</th>
                                 <th>Regjistruar</th>
@@ -882,7 +902,19 @@ $current_page = 'register_worker';
                                     <div class="worker-meta"><?= htmlspecialchars($w['email'] ?: 'Pa email') ?></div>
                                 </td>
                                 <td><?= htmlspecialchars($w['username']) ?></td>
-                                <td><?= htmlspecialchars($w['phone'] ?: '—') ?></td>
+                                <td>
+                                    <?php
+                                        $roleLabels = ['staff'=>'Staff','dentist'=>'Dentist','receptionist'=>'Receptionist','manager'=>'Manager'];
+                                        $roleColors = ['staff'=>'#6c757d','dentist'=>'var(--green-dark)','receptionist'=>'var(--yellow)','manager'=>'#5b4fcf'];
+                                        $roleBg    = ['staff'=>'#f0f0f0','dentist'=>'var(--green-light)','receptionist'=>'var(--yellow-light)','manager'=>'#eeebfb'];
+                                        $r = $w['role'] ?? 'staff';
+                                        $rl = $roleLabels[$r] ?? ucfirst($r);
+                                        $rc = $roleColors[$r] ?? '#6c757d';
+                                        $rb = $roleBg[$r] ?? '#f0f0f0';
+                                    ?>
+                                    <span style="background:<?= $rb ?>; color:<?= $rc ?>; padding:3px 10px; border-radius:50px; font-size:12px; font-weight:500;"><?= htmlspecialchars($rl) ?></span>
+                                </td>
+                                <td><?= htmlspecialchars($w['phone'] ?? '—') ?></td>
                                 <td>
                                     <?php if ($w['status'] === 'Active'): ?>
                                         <span class="badge badge-confirmed">✓ Aktiv</span>
@@ -902,7 +934,8 @@ $current_page = 'register_worker';
                                                 '<?= htmlspecialchars(addslashes($w['full_name'] ?? '')) ?>',
                                                 '<?= htmlspecialchars(addslashes($w['email'] ?? '')) ?>',
                                                 '<?= htmlspecialchars(addslashes($w['phone'] ?? '')) ?>',
-                                                '<?= htmlspecialchars(addslashes($w['username'])) ?>'
+                                                '<?= htmlspecialchars(addslashes($w['username'])) ?>',
+                                                '<?= htmlspecialchars($w['role'] ?? 'staff') ?>'
                                             )">Ndrysho</button>
                                         <form id="delete-worker-form-<?= $w['id'] ?>" method="POST" action="" style="display:inline;">
                                             <input type="hidden" name="user_id" value="<?= $w['id'] ?>">
@@ -914,7 +947,7 @@ $current_page = 'register_worker';
                             </tr>
                             <?php endforeach; ?>
                             <tr id="noWorkerResults" style="display:none;">
-                                <td colspan="6" style="text-align:center; padding:40px 20px;">
+                                <td colspan="7" style="text-align:center; padding:40px 20px;">
                                     <div style="font-size:32px; margin-bottom:8px;">🔍</div>
                                     <p style="color:var(--text-soft); font-size:14px;">Nuk u gjet asnjë punëtor.</p>
                                 </td>
@@ -972,6 +1005,15 @@ $current_page = 'register_worker';
                 <div class="field" style="margin-bottom:14px;">
                     <label for="edit_phone">Numri i Telefonit</label>
                     <input type="text" id="edit_phone" name="phone" placeholder="044 123 456">
+                </div>
+                <div class="field" style="margin-bottom:14px;">
+                    <label for="edit_role">Roli</label>
+                    <select id="edit_role" name="role">
+                        <option value="staff">Staff</option>
+                        <option value="dentist">Dentist</option>
+                        <option value="receptionist">Receptionist</option>
+                        <option value="manager">Manager</option>
+                    </select>
                 </div>
                 <div class="field" style="margin-bottom:14px;">
                     <label for="edit_username">Username</label>
@@ -1040,13 +1082,14 @@ $current_page = 'register_worker';
         };
 
         // ── EDIT MODAL ──
-        function openEditModal(id, fullName, email, phone, username) {
+        function openEditModal(id, fullName, email, phone, username, role) {
             document.getElementById('edit_user_id').value   = id;
             document.getElementById('edit_full_name').value = fullName;
             document.getElementById('edit_email').value     = email;
             document.getElementById('edit_phone').value     = phone;
             document.getElementById('edit_username').value  = username;
             document.getElementById('edit_password').value  = '';
+            document.getElementById('edit_role').value      = role || 'staff';
             document.getElementById('editModal').classList.add('active');
         }
 
