@@ -289,6 +289,41 @@ $attendance_history = $historyStmt->fetchAll(PDO::FETCH_ASSOC);
             top: 0;
             z-index: 1;
         }
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+
+            aside {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 16px 20px;
+                flex-direction: row;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 12px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .brand { margin-bottom: 0; flex: 1; }
+            .menu { flex-direction: row; flex-wrap: wrap; gap: 4px; width: 100%; }
+            .menu-item a { padding: 8px 12px; font-size: 13px; }
+            .logout-btn { margin-top: 0; border-top: none; padding-top: 0; border-left: 1px solid var(--border); padding-left: 12px; }
+
+            main { padding: 20px 16px; }
+
+            header { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 20px; }
+
+            .metrics-grid { grid-template-columns: 1fr; }
+
+            .history-filters { flex-direction: column; align-items: stretch; gap: 10px; }
+            .history-filters form { width: 100%; justify-content: space-between; }
+            .history-date-input { flex: 1; }
+
+            .panel { overflow-x: auto; }
+            .table-scroll { max-height: 360px; }
+            table { min-width: 480px; }
+        }
     </style>
 </head>
 <body>
