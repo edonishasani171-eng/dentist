@@ -11,7 +11,8 @@ if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
 require_once 'db.php';
 
 // Only admins can access this page
-if (($_SESSION['user_role'] ?? '') !== 'admin') {
+$allowed_page_roles = ['admin', 'manager'];
+if (!in_array($_SESSION['user_role'] ?? '', $allowed_page_roles)) {
     http_response_code(403);
     die('Akses i ndaluar. Vetëm administratorët mund të regjistrojnë punëtorë të rinj.');
 }
@@ -26,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $full_name = trim($_POST['full_name'] ?? '');
     $email     = trim($_POST['email'] ?? '');
     $phone     = trim($_POST['phone'] ?? '');
-    $allowed_roles = ['staff', 'dentist', 'receptionist', 'manager'];
+    $allowed_roles = ['staff', 'dentist', 'receptionist', 'manager', 'admin'];
     $role      = in_array(trim($_POST['role'] ?? ''), $allowed_roles) ? trim($_POST['role']) : 'staff';
 
     if (empty($username) || empty($password)) {
@@ -106,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $email      = trim($_POST['email'] ?? '');
     $phone      = trim($_POST['phone'] ?? '');
     $password   = trim($_POST['password'] ?? '');
-    $edit_allowed_roles = ['staff', 'dentist', 'receptionist', 'manager'];
+    $edit_allowed_roles = ['staff', 'dentist', 'receptionist', 'manager', 'admin'];
     $edit_role  = in_array(trim($_POST['role'] ?? ''), $edit_allowed_roles) ? trim($_POST['role']) : 'staff';
 
     if (empty($username)) {
@@ -419,12 +420,17 @@ $current_page = 'register_worker';
             max-width: 460px;
             width: 90%;
             text-align: center;
-            transform: scale(0.92) translateY(14px);
-            transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+            transform: scale(0.88) translateY(20px);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.16,1,0.3,1),
+                        opacity 0.3s ease;
             box-shadow: 0 20px 60px rgba(0,0,0,0.2);
         }
 
-        .result-overlay.active .result-box { transform: scale(1) translateY(0); }
+        .result-overlay.active .result-box {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
 
         .result-icon {
             width: 76px;
@@ -750,6 +756,102 @@ $current_page = 'register_worker';
             .list-card { overflow-x: auto; }
             table { min-width: 560px; }
         }
+        /* ── CUSTOM ROLE SELECT ── */
+        .custom-select-wrapper {
+            position: relative;
+            user-select: none;
+        }
+
+        .custom-select-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 11px 14px;
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            color: var(--text);
+            cursor: pointer;
+            transition: border-color .2s, box-shadow .2s, background .2s;
+        }
+
+        .custom-select-trigger:hover,
+        .custom-select-wrapper.open .custom-select-trigger {
+            border-color: var(--green);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(26,122,94,0.1);
+        }
+
+        .custom-select-arrow {
+            width: 14px;
+            height: 14px;
+            stroke: var(--text-soft);
+            fill: none;
+            stroke-width: 2.5;
+            transition: transform 0.25s ease;
+            flex-shrink: 0;
+        }
+
+        .custom-select-wrapper.open .custom-select-arrow {
+            transform: rotate(180deg);
+        }
+
+        .custom-select-dropdown {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0;
+            right: 0;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(26,26,24,0.12);
+            z-index: 999;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transform: translateY(-6px);
+            transition: max-height 0.3s cubic-bezier(0.16,1,0.3,1),
+                        opacity 0.2s ease,
+                        transform 0.25s cubic-bezier(0.16,1,0.3,1);
+            pointer-events: none;
+        }
+
+        .custom-select-wrapper.open .custom-select-dropdown {
+            max-height: 300px;
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .custom-select-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 14px;
+            font-size: 14px;
+            color: var(--text-mid);
+            cursor: pointer;
+            transition: background .15s;
+        }
+
+        .custom-select-option:hover {
+            background: var(--green-light);
+            color: var(--green-dark);
+        }
+
+        .custom-select-option.selected {
+            color: var(--green-dark);
+            font-weight: 500;
+        }
+
+        .custom-select-option .role-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body>
@@ -839,13 +941,31 @@ $current_page = 'register_worker';
                     </div>
 
                     <div class="field">
-                        <label for="role">Roli</label>
-                        <select id="role" name="role">
-                            <option value="staff" <?= ($keep && ($_POST['role'] ?? '') === 'staff') ? 'selected' : '' ?>>Staff</option>
-                            <option value="dentist" <?= ($keep && ($_POST['role'] ?? '') === 'dentist') ? 'selected' : '' ?>>Dentist</option>
-                            <option value="receptionist" <?= ($keep && ($_POST['role'] ?? '') === 'receptionist') ? 'selected' : '' ?>>Receptionist</option>
-                            <option value="manager" <?= ($keep && ($_POST['role'] ?? '') === 'manager') ? 'selected' : '' ?>>Manager</option>
-                        </select>
+                        <label>Roli</label>
+                        <div class="custom-select-wrapper" id="roleSelectWrapper">
+                            <input type="hidden" name="role" id="roleHiddenInput" value="<?= $keep ? htmlspecialchars($_POST['role'] ?? 'staff') : 'staff' ?>">
+                            <div class="custom-select-trigger" onclick="toggleRoleDropdown()">
+                                <span id="roleSelectedLabel">Staff</span>
+                                <svg class="custom-select-arrow" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </div>
+                            <div class="custom-select-dropdown">
+                                <div class="custom-select-option" data-value="staff" onclick="selectRole(this)">
+                                    <span class="role-dot" style="background:#6c757d;"></span> Staff
+                                </div>
+                                <div class="custom-select-option" data-value="dentist" onclick="selectRole(this)">
+                                    <span class="role-dot" style="background:var(--green);"></span> Dentist
+                                </div>
+                                <div class="custom-select-option" data-value="receptionist" onclick="selectRole(this)">
+                                    <span class="role-dot" style="background:var(--yellow);"></span> Receptionist
+                                </div>
+                                <div class="custom-select-option" data-value="manager" onclick="selectRole(this)">
+                                    <span class="role-dot" style="background:#5b4fcf;"></span> Manager
+                                </div>
+                                <div class="custom-select-option" data-value="admin" onclick="selectRole(this)">
+                                    <span class="role-dot" style="background:#c0392b;"></span> Admin
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="field">
@@ -1129,6 +1249,43 @@ $current_page = 'register_worker';
                 showResult('success', 'U regjistrua me sukses!', PHP_SUCCESS);
             }
         });
+// ── CUSTOM ROLE DROPDOWN ──
+const roleMeta = {
+    staff:        { label: 'Staff',        dot: '#6c757d' },
+    dentist:      { label: 'Dentist',      dot: 'var(--green)' },
+    receptionist: { label: 'Receptionist', dot: 'var(--yellow)' },
+    manager:      { label: 'Manager',      dot: '#5b4fcf' },
+    admin:        { label: 'Admin',        dot: '#c0392b' },
+};
+
+function toggleRoleDropdown() {
+    document.getElementById('roleSelectWrapper').classList.toggle('open');
+}
+
+function selectRole(el) {
+    const value = el.getAttribute('data-value');
+    document.getElementById('roleHiddenInput').value = value;
+    document.getElementById('roleSelectedLabel').textContent = roleMeta[value]?.label || value;
+    document.querySelectorAll('#roleSelectWrapper .custom-select-option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('roleSelectWrapper').classList.remove('open');
+}
+
+// Set initial selected state from hidden input value on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const initial = document.getElementById('roleHiddenInput')?.value || 'staff';
+    document.getElementById('roleSelectedLabel').textContent = roleMeta[initial]?.label || initial;
+    const match = document.querySelector(`#roleSelectWrapper [data-value="${initial}"]`);
+    if (match) match.classList.add('selected');
+});
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    const wrapper = document.getElementById('roleSelectWrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+        wrapper.classList.remove('open');
+    }
+});
     </script>
 </body>
 </html>
