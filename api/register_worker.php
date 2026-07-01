@@ -14,7 +14,242 @@ require_once 'db.php';
 $allowed_page_roles = ['admin', 'manager'];
 if (!in_array($_SESSION['user_role'] ?? '', $allowed_page_roles)) {
     http_response_code(403);
-    die('Akses i ndaluar. Vetëm administratorët mund të regjistrojnë punëtorë të rinj.');
+    die('<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akses i Ndaluar — DentCare</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --green: #1a7a5e; --green-dark: #0f5441; --green-light: #e8f5f1;
+            --cream: #faf8f4; --text: #1a1a18; --text-mid: #4a4a45;
+            --text-soft: #8a8a82; --white: #ffffff; --border: rgba(26,26,24,0.10);
+            --red: #c0392b;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: "DM Sans", sans-serif;
+            background: var(--cream);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .box {
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 48px 40px;
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(26,122,94,0.08);
+            animation: fadeUp 0.4s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .icon-wrap {
+            width: 72px; height: 72px;
+            background: #fdf0ef;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
+        }
+        h1 {
+            font-family: "DM Serif Display", serif;
+            font-size: 24px;
+            color: var(--text);
+            margin-bottom: 10px;
+            letter-spacing: -0.01em;
+        }
+        p {
+            font-size: 14px;
+            color: var(--text-soft);
+            line-height: 1.6;
+            margin-bottom: 28px;
+        }
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+        .prompt {
+            font-size: 14px;
+            color: var(--text-mid);
+            margin-bottom: 16px;
+        }
+        .btn-login {
+            display: inline-block;
+            background: var(--green);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-family: "DM Sans", sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s;
+            text-decoration: none;
+        }
+        .btn-login:hover { background: var(--green-dark); }
+        .back-link {
+            display: block;
+            margin-top: 16px;
+            font-size: 13px;
+            color: var(--text-soft);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--green); }
+
+        /* LOGIN MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(26,26,24,0.5);
+            backdrop-filter: blur(5px);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-box {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 32px;
+            width: 90%;
+            max-width: 380px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            transform: scale(0.92) translateY(16px);
+            opacity: 0;
+            transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease;
+        }
+        .modal-overlay.active .modal-box { transform: scale(1) translateY(0); opacity: 1; }
+        .modal-box h2 {
+            font-family: "DM Serif Display", serif;
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+        .field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 14px; }
+        .field label {
+            font-size: 11px; font-weight: 500; color: var(--text-mid);
+            text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        .field input {
+            padding: 11px 14px;
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: "DM Sans", sans-serif;
+            font-size: 14px; color: var(--text); outline: none;
+            transition: border-color .2s, box-shadow .2s;
+            width: 100%;
+        }
+        .field input:focus {
+            border-color: var(--green);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(26,122,94,0.1);
+        }
+        .error-msg {
+            background: #fdf0ef; border: 1px solid #f5c6c2;
+            color: var(--red); padding: 10px 14px;
+            border-radius: 8px; font-size: 13px;
+            margin-bottom: 14px; display: none;
+        }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; }
+        .btn-cancel {
+            padding: 10px 18px; border-radius: 8px;
+            border: 1px solid var(--border); background: var(--cream);
+            color: var(--text-mid); cursor: pointer; font-size: 14px;
+        }
+        .btn-submit {
+            padding: 10px 20px; border-radius: 8px; border: none;
+            background: var(--green); color: white;
+            cursor: pointer; font-size: 14px; font-weight: 500;
+            transition: background .2s;
+        }
+        .btn-submit:hover { background: var(--green-dark); }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="icon-wrap">🔒</div>
+        <h1>Akses i Kufizuar</h1>
+        <p>Ju nuk keni leje për të hyrë në këtë faqe. Kjo zonë është e rezervuar vetëm për administratorët dhe menaxherët.</p>
+        <hr class="divider">
+        <p class="prompt">Dëshironi të hyni me një llogari tjetër?</p>
+        <button class="btn-login" onclick="openLoginModal()">Hyr si Administrator</button>
+        <a href="admin_dashboard.php" class="back-link">← Kthehu tek Dashboard</a>
+    </div>
+
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-box">
+            <h2>Hyrja e Administratorit</h2>
+            <div class="error-msg" id="loginError"></div>
+            <form id="adminLoginForm">
+                <div class="field">
+                    <label>Username</label>
+                    <input type="text" id="adminUsername" placeholder="username..." autocomplete="off">
+                </div>
+                <div class="field">
+                    <label>Password</label>
+                    <input type="password" id="adminPassword" placeholder="fjalëkalimi...">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeLoginModal()">Anulo</button>
+                    <button type="submit" class="btn-submit">Hyr</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openLoginModal() {
+            setTimeout(() => document.getElementById("loginModal").classList.add("active"), 10);
+        }
+        function closeLoginModal() {
+            document.getElementById("loginModal").classList.remove("active");
+        }
+        window.onclick = function(e) {
+            const m = document.getElementById("loginModal");
+            if (e.target === m) closeLoginModal();
+        };
+        document.getElementById("adminLoginForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const username = document.getElementById("adminUsername").value.trim();
+            const password = document.getElementById("adminPassword").value;
+            const errorEl = document.getElementById("loginError");
+
+            if (!username || !password) {
+                errorEl.textContent = "Ju lutem plotësoni të dyja fushat.";
+                errorEl.style.display = "block";
+                return;
+            }
+
+            const form = document.createElement("form");
+            form.method = "POST";
+            form.action = "login.php";
+            const u = document.createElement("input");
+            u.type = "hidden"; u.name = "username"; u.value = username;
+            const p = document.createElement("input");
+            p.type = "hidden"; p.name = "password"; p.value = password;
+            form.appendChild(u); form.appendChild(p);
+            document.body.appendChild(form);
+            form.submit();
+        });
+    </script>
+</body>
+</html>');
 }
 
 $error = '';
