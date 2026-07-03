@@ -839,7 +839,9 @@ footer a { color: var(--green); text-decoration: none; font-size: 13px; }
         height: 58px;
     }
 
-    /* KJO U LARGUA: '.nav-links { display: none; }' është hequr që të mos bllokojë menunë active */
+    .nav-links {
+        top: 58px;
+    }
 
     .hero {
         padding: 70px 16px 50px;
