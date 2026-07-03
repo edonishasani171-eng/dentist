@@ -55,8 +55,7 @@ nav {
 /* Butoni me 3 vija për Mobile (Fshihet në Desktop) */
 .menu-toggle {
     display: none;
-    flex-direction: column;
-    justify-content: space-between;
+    position: relative;
     width: 24px;
     height: 18px;
     background: transparent;
@@ -67,11 +66,31 @@ nav {
 }
 
 .menu-toggle span {
+    position: absolute;
+    left: 0;
     width: 100%;
     height: 3px;
     background-color: var(--green);
     border-radius: 2px;
-    transition: all 0.3s ease;
+    transition: top 0.3s ease, transform 0.3s ease;
+}
+
+.menu-toggle span:nth-child(1) {
+    top: 0;
+}
+
+.menu-toggle span:nth-child(2) {
+    top: calc(100% - 3px);
+}
+
+.menu-toggle.active span:nth-child(1) {
+    top: calc(50% - 1.5px);
+    transform: rotate(45deg);
+}
+
+.menu-toggle.active span:nth-child(2) {
+    top: calc(50% - 1.5px);
+    transform: rotate(-45deg);
 }
 
 .nav-logo {
@@ -737,7 +756,7 @@ footer a { color: var(--green); text-decoration: none; font-size: 13px; }
         /* Në vend të display: none, përdorim këto për animacion */
         display: flex; 
         position: absolute;
-        top: 68px; 
+        top: 100%; 
         left: 0;
         width: 100%;
         background-color: var(--white);

@@ -23,7 +23,6 @@
     <button class="menu-toggle" id="menu-toggle" aria-label="Hap menunë">
         <span></span>
         <span></span>
-        <span></span>
     </button>
     <ul class="nav-links" id="nav-links">
         <li><a href="#lokacioni">Lokacioni</a></li>
@@ -517,15 +516,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Funksioni i klikimit
     menuToggle.addEventListener('click', function(e) {
-        e.stopPropagation(); // Ndalon eventin të shpërndahet në elementet e tjerë
+        e.stopPropagation();
         navLinks.classList.toggle('active');
-        console.log("Menuja u klikua!"); // Do ta shohësh te 'Console' nëse punon
+        menuToggle.classList.toggle('active');
     });
 
     // Mbyll menunë kur klikohet jashtë saj
     document.addEventListener('click', function(e) {
         if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
             navLinks.classList.remove('active');
+            menuToggle.classList.remove('active');
         }
     });
 
@@ -533,6 +533,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.querySelectorAll('.nav-links a').forEach(link => {
         link.addEventListener('click', () => {
             navLinks.classList.remove('active');
+            menuToggle.classList.remove('active');
         });
     });
 });
