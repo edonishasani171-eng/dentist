@@ -342,6 +342,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
     }
 }
+// ── HANDLE: ACTIVATE WORKER ──
+if ($_SERVER['REQUEST_METHOD'] === 'POST'
+    && isset($_POST['action'])
+    && $_POST['action'] === 'activate_worker') {
+
+    $target_id = (int)($_POST['user_id'] ?? 0);
+
+    try {
+
+        $stmt = $pdo->prepare("
+            UPDATE users
+            SET status = 'Active'
+            WHERE id = :id
+        ");
+
+        $stmt->execute([
+            'id' => $target_id
+        ]);
+
+        $success = "Punëtori u aktivizua me sukses.";
+
+    } catch (PDOException $e) {
+
+        $error = "Gabim gjatë aktivizimit: " . $e->getMessage();
+
+    }
+}
 
 // ── HANDLE: EDIT WORKER ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'edit_worker') {
@@ -920,6 +947,20 @@ $current_page = 'register_worker';
 
         .btn-delete-worker:hover { background: var(--red); }
 
+        .btn-activate-worker{
+            background:#28a745;
+            color:#fff;
+            border:none;
+            border-radius:8px;
+            padding:8px 16px;
+            cursor:pointer;
+            transition:.3s;
+        }
+
+        .btn-activate-worker:hover{
+            background:#218838;
+        }
+
         .empty-state {
             text-align: center;
             padding: 50px 20px;
@@ -1309,8 +1350,28 @@ $current_page = 'register_worker';
                                             )">Ndrysho</button>
                                         <form id="delete-worker-form-<?= $w['id'] ?>" method="POST" action="" style="display:inline;">
                                             <input type="hidden" name="user_id" value="<?= $w['id'] ?>">
+                                            <?php if ($w['status'] === 'Active'): ?>
+
                                             <input type="hidden" name="action" value="delete_worker">
-                                            <button type="button" class="btn-delete-worker" onclick="triggerDeleteConfirm(<?= $w['id'] ?>, '<?= htmlspecialchars(addslashes($w['full_name'] ?: $w['username'])) ?>')">Çaktivizo</button>
+
+                                            <button
+                                                type="button"
+                                                class="btn-delete-worker"
+                                                onclick="triggerDeleteConfirm(<?= $w['id'] ?>, '<?= htmlspecialchars(addslashes($w['full_name'] ?: $w['username'])) ?>')">
+                                                Çaktivizo
+                                            </button>
+
+                                        <?php else: ?>
+
+                                            <input type="hidden" name="action" value="activate_worker">
+
+                                            <button
+                                                type="submit"
+                                                class="btn-activate-worker">
+                                                Aktivizo
+                                            </button>
+
+                                        <?php endif; ?>
                                         </form>
                                     </div>
                                 </td>
@@ -1519,8 +1580,22 @@ $current_page = 'register_worker';
                 setTimeout(() => showResult('error', 'Gabim!', PHP_ERROR), 80);
             }
             if (PHP_SUCCESS && PHP_SUCCESS.length > 0) {
-                const isEdit = PHP_SUCCESS.includes('përditësuan') || PHP_SUCCESS.includes('fshi');
-                const title = isEdit ? 'Ndryshimet u ruajtën!' : 'U regjistrua me sukses!';
+
+                const isRegister   = PHP_SUCCESS.includes('u regjistrua');
+                const isDeactivate = PHP_SUCCESS.includes('çaktivizua');
+                const isActivate   = PHP_SUCCESS.includes('aktivizua');
+                const isEdit       = PHP_SUCCESS.includes('përditësua');
+
+                let title = 'Sukses!';
+
+                if (isRegister) {
+                    title = 'U regjistrua me sukses!';
+                } else if (isDeactivate || isActivate) {
+                    title = 'Statusi u përditësua!';
+                } else if (isEdit) {
+                    title = 'Ndryshimet u ruajtën!';
+                }
+
                 setTimeout(() => showResult('success', title, PHP_SUCCESS), 80);
             }
         });
