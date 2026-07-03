@@ -325,9 +325,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $error = "Nuk mund ta fshini llogarinë tuaj nga këtu.";
     } else {
         try {
-            $del_stmt = $pdo->prepare("DELETE FROM users WHERE id = :id AND role != 'admin'");
-            $del_stmt->execute(['id' => $target_id]);
-            $success = "Punëtori u fshi me sukses.";
+            $stmt = $pdo->prepare("
+            UPDATE users
+            SET status = 'Inactive'
+            WHERE id = :id
+            AND role != 'admin'
+        ");
+
+        $stmt->execute([
+            'id' => $target_id
+        ]);
+
+        $success = "Punëtori u çaktivizua me sukses.";
         } catch (PDOException $e) {
             $error = "Gabim gjatë fshirjes: " . $e->getMessage();
         }
@@ -1301,7 +1310,7 @@ $current_page = 'register_worker';
                                         <form id="delete-worker-form-<?= $w['id'] ?>" method="POST" action="" style="display:inline;">
                                             <input type="hidden" name="user_id" value="<?= $w['id'] ?>">
                                             <input type="hidden" name="action" value="delete_worker">
-                                            <button type="button" class="btn-delete-worker" onclick="triggerDeleteConfirm(<?= $w['id'] ?>, '<?= htmlspecialchars(addslashes($w['full_name'] ?: $w['username'])) ?>')">Fshije</button>
+                                            <button type="button" class="btn-delete-worker" onclick="triggerDeleteConfirm(<?= $w['id'] ?>, '<?= htmlspecialchars(addslashes($w['full_name'] ?: $w['username'])) ?>')">Çaktivizo</button>
                                         </form>
                                     </div>
                                 </td>
@@ -1335,11 +1344,11 @@ $current_page = 'register_worker';
     <div id="confirmModal" class="modal-overlay">
         <div class="modal-box">
             <div class="icon">🗑️</div>
-            <h3>Fshi Punëtorin?</h3>
-            <p id="confirmMessage">A jeni i sigurt që dëshironi të fshini këtë punëtor?</p>
+            <h3>Çaktivizo Punëtorin?</h3>
+            <p id="confirmMessage">A jeni i sigurt që dëshironi të Çaktivizoni këtë punëtor?</p>
             <div class="modal-actions">
                 <button type="button" class="btn-no" onclick="closeConfirmModal()">Jo</button>
-                <button type="button" class="btn-yes" id="confirmDeleteBtn">Po, Fshije</button>
+                <button type="button" class="btn-yes" id="confirmDeleteBtn">Po, Çaktivizo</button>
             </div>
         </div>
     </div>
