@@ -1038,28 +1038,31 @@ try {
         }
     }
     /* ── NOTIFICATION BADGE ── */
-        .menu-item a {
+        .menu-item {
             position: relative;
         }
 
         .notif-badge {
             position: absolute;
-            top: 6px;
-            right: 6px;
-            background: #df473c;
-            color: white;
-            font-size: 10px;
-            font-weight: 700;
-            min-width: 18px;
+            top: 12px;
+            right: 18px;
+
+            width: 18px;
             height: 18px;
-            border-radius: 50px;
+
+            background: #e53935;
+            border: 2px solid #fff;
+            border-radius: 50%;
+
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 4px;
-            line-height: 1;
-            pointer-events: none;
-            transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease;
+
+            color: #fff;
+            font-size: 10px;
+            font-weight: bold;
+
+            z-index: 100;
         }
 
         .notif-badge.hidden {
@@ -1645,34 +1648,7 @@ try {
             bar.style.width = '100%';
         }
     }, interval);
-}
-// ── NOTIFICATION BADGE DISMISS ──
-document.addEventListener('DOMContentLoaded', function() {
-    const badge = document.getElementById('notifBadge');
-    const dashLink = document.getElementById('dashboardLink');
-
-    if (!badge || !dashLink) return;
-
-    // If already on dashboard page, hide it immediately
-    const urlParams = new URLSearchParams(window.location.search);
-    const page = urlParams.get('page');
-    if (page === 'dashboard' || page === null) {
-        badge.classList.add('hidden');
-        localStorage.setItem('dashNotifDismissed', '<?= $pending_count ?>');
-    }
-
-    // Hide when clicked
-    dashLink.addEventListener('click', function() {
-        badge.classList.add('hidden');
-        localStorage.setItem('dashNotifDismissed', '<?= $pending_count ?>');
-    });
-
-    // Check if user already dismissed this count
-    const dismissed = localStorage.getItem('dashNotifDismissed');
-    if (dismissed && parseInt(dismissed) >= <?= $pending_count ?>) {
-        badge.classList.add('hidden');
-    }
-});
+};
 </script>
 </body>
 </html>
