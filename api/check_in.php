@@ -42,20 +42,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 }
 
 // ── FETCH DATA ──
+$current_user_id   = (int)$_SESSION['user_id'];
+$current_user_role = $_SESSION['user_role'] ?? 'staff';
+$is_admin          = in_array($current_user_role, ['admin', 'manager']);
+
 try {
-    $staffStmt = $pdo->prepare(
-        "SELECT * FROM (
-            SELECT DISTINCT ON (u.id)
+    if ($is_admin) {
+        // Admin sees all active staff
+        $staffStmt = $pdo->prepare(
+            "SELECT * FROM (
+                SELECT DISTINCT ON (u.id)
+                    u.id, COALESCE(u.full_name, u.username) AS display_name, u.role,
+                    sa.check_in_time, sa.check_out_time
+                FROM users u
+                LEFT JOIN staff_attendance sa ON sa.user_id = u.id AND sa.work_date = :d
+                WHERE u.status = 'Active'
+                ORDER BY u.id, sa.check_in_time DESC NULLS LAST
+            ) latest
+            ORDER BY display_name ASC"
+        );
+        $staffStmt->execute(['d' => $today]);
+    } else {
+        // Regular staff sees only themselves
+        $staffStmt = $pdo->prepare(
+            "SELECT DISTINCT ON (u.id)
                 u.id, COALESCE(u.full_name, u.username) AS display_name, u.role,
                 sa.check_in_time, sa.check_out_time
-            FROM users u
-            LEFT JOIN staff_attendance sa ON sa.user_id = u.id AND sa.work_date = :d
-            WHERE u.status = 'Active'
-            ORDER BY u.id, sa.check_in_time DESC NULLS LAST
-        ) latest
-        ORDER BY display_name ASC"
-    );
-    $staffStmt->execute(['d' => $today]);
+             FROM users u
+             LEFT JOIN staff_attendance sa ON sa.user_id = u.id AND sa.work_date = :d
+             WHERE u.id = :uid AND u.status = 'Active'
+             ORDER BY u.id, sa.check_in_time DESC NULLS LAST"
+        );
+        $staffStmt->execute(['d' => $today, 'uid' => $current_user_id]);
+    }
     $staff = $staffStmt->fetchAll(PDO::FETCH_ASSOC);
 
     $present_count = 0;
@@ -65,26 +84,56 @@ try {
 
     $history_date = $_GET['history_date'] ?? '';
 
-if ($history_date !== '') {
-    $historyStmt = $pdo->prepare(
-        "SELECT COALESCE(u.full_name, u.username) AS display_name, u.role, sa.check_in_time, sa.check_out_time, sa.work_date
-         FROM staff_attendance sa
-         JOIN users u ON u.id = sa.user_id
-         WHERE sa.work_date = :hd
-         ORDER BY sa.check_in_time DESC"
-    );
-    $historyStmt->execute(['hd' => $history_date]);
-} else {
-    $historyStmt = $pdo->prepare(
-        "SELECT COALESCE(u.full_name, u.username) AS display_name, u.role, sa.check_in_time, sa.check_out_time, sa.work_date
-         FROM staff_attendance sa
-         JOIN users u ON u.id = sa.user_id
-         ORDER BY sa.check_in_time DESC
-         LIMIT 50"
-    );
-    $historyStmt->execute();
-}
-$attendance_history = $historyStmt->fetchAll(PDO::FETCH_ASSOC);
+    if ($is_admin) {
+        // Admin sees full history or filtered by date
+        if ($history_date !== '') {
+            $historyStmt = $pdo->prepare(
+                "SELECT COALESCE(u.full_name, u.username) AS display_name, u.role,
+                        sa.check_in_time, sa.check_out_time, sa.work_date
+                 FROM staff_attendance sa
+                 JOIN users u ON u.id = sa.user_id
+                 WHERE sa.work_date = :hd
+                 ORDER BY sa.check_in_time DESC"
+            );
+            $historyStmt->execute(['hd' => $history_date]);
+        } else {
+            $historyStmt = $pdo->prepare(
+                "SELECT COALESCE(u.full_name, u.username) AS display_name, u.role,
+                        sa.check_in_time, sa.check_out_time, sa.work_date
+                 FROM staff_attendance sa
+                 JOIN users u ON u.id = sa.user_id
+                 ORDER BY sa.check_in_time DESC
+                 LIMIT 50"
+            );
+            $historyStmt->execute();
+        }
+    } else {
+        // Regular staff sees only their own history
+        if ($history_date !== '') {
+            $historyStmt = $pdo->prepare(
+                "SELECT COALESCE(u.full_name, u.username) AS display_name, u.role,
+                        sa.check_in_time, sa.check_out_time, sa.work_date
+                 FROM staff_attendance sa
+                 JOIN users u ON u.id = sa.user_id
+                 WHERE sa.user_id = :uid AND sa.work_date = :hd
+                 ORDER BY sa.check_in_time DESC"
+            );
+            $historyStmt->execute(['uid' => $current_user_id, 'hd' => $history_date]);
+        } else {
+            $historyStmt = $pdo->prepare(
+                "SELECT COALESCE(u.full_name, u.username) AS display_name, u.role,
+                        sa.check_in_time, sa.check_out_time, sa.work_date
+                 FROM staff_attendance sa
+                 JOIN users u ON u.id = sa.user_id
+                 WHERE sa.user_id = :uid
+                 ORDER BY sa.check_in_time DESC
+                 LIMIT 50"
+            );
+            $historyStmt->execute(['uid' => $current_user_id]);
+        }
+    }
+    $attendance_history = $historyStmt->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
     die("Dështoi leximi i të dhënave: " . $e->getMessage());
 }
@@ -390,7 +439,7 @@ $attendance_history = $historyStmt->fetchAll(PDO::FETCH_ASSOC);
 
         <div class="metrics-grid">
             <div class="card">
-                <div class="card-meta">Stafi Prezent</div>
+                <div class="card-meta"><?= $is_admin ? 'Stafi Prezent' : 'Statusi Im Sot' ?></div>
                 <div class="card-value" style="color: var(--green);"><?= $present_count ?> / <?= count($staff) ?></div>
             </div>
         </div>
@@ -398,7 +447,7 @@ $attendance_history = $historyStmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="panels">
             <!-- STAFF PANEL -->
             <div class="panel">
-                <div class="panel-header"><h2>Stafi</h2></div>
+                <div class="panel-header"><h2><?= $is_admin ? 'Stafi' : 'Check-In Im' ?></h2></div>
 
                 <div class="history-filters">
                     <div class="history-search-wrapper">
@@ -462,7 +511,7 @@ $attendance_history = $historyStmt->fetchAll(PDO::FETCH_ASSOC);
 
             <!-- ATTENDANCE HISTORY PANEL -->
             <div class="panel">
-                <div class="panel-header"><h2>Historiku i Check-Ineve</h2></div>
+                <div class="panel-header"><h2><?= $is_admin ? 'Historiku i Check-Ineve' : 'Historiku Im' ?></h2></div>
 
                 <div class="history-filters">
                     <div class="history-search-wrapper">
