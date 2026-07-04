@@ -1265,7 +1265,7 @@ try {
     </header>
 
     <!-- Stat boxes -->
-    <div style="display:flex; gap:16px; margin-bottom:24px;">
+    <div style="display:flex; gap:16px; margin-bottom:24px; flex-wrap:wrap;">
         <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; gap:4px; min-width:110px;">
             <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-soft); font-weight:500;">Pa Kryer</span>
             <span style="font-family:'DM Serif Display',serif; font-size:26px; color:var(--yellow);"><?= $pa_kryer_count ?></span>
@@ -1273,6 +1273,10 @@ try {
         <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; gap:4px; min-width:110px;">
             <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-soft); font-weight:500;">Kryer</span>
             <span style="font-family:'DM Serif Display',serif; font-size:26px; color:var(--green);"><?= $kryer_count ?></span>
+        </div>
+        <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; gap:4px; min-width:110px;">
+            <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-soft); font-weight:500;">Anuluar</span>
+            <span style="font-family:'DM Serif Display',serif; font-size:26px; color:var(--orange);"><?= $cancelled_count ?></span>
         </div>
     </div>
 
@@ -1326,18 +1330,22 @@ try {
                         <?php elseif ($app['kryer'] == 2): ?>
                             <span class="badge badge-cancelled">✕ Pa Kryer</span>
                         <?php else: ?>
-                            <div style="display:flex; gap:6px;">
-                                <form method="POST" action="" style="display:inline;">
-                                    <input type="hidden" name="appointment_id" value="<?= $app['id'] ?>">
-                                    <input type="hidden" name="action" value="kryer">
-                                    <button type="submit" class="btn" style="background:var(--green); color:white; font-size:12px; padding:5px 12px;">✓ Kryer</button>
-                                </form>
-                                <form method="POST" action="" style="display:inline;">
-                                    <input type="hidden" name="appointment_id" value="<?= $app['id'] ?>">
-                                    <input type="hidden" name="action" value="pakryer">
-                                    <button type="submit" class="btn" style="background:var(--yellow); color:white; font-size:12px; padding:5px 12px;">✕ Pa Kryer</button>
-                                </form>
-                            </div>
+                            <?php if ($app['status'] === 'Confirmed'): ?>
+                                <div style="display:flex; gap:6px;">
+                                    <form method="POST" action="" style="display:inline;">
+                                        <input type="hidden" name="appointment_id" value="<?= $app['id'] ?>">
+                                        <input type="hidden" name="action" value="kryer">
+                                        <button type="submit" class="btn" style="background:var(--green); color:white; font-size:12px; padding:5px 12px;">✓ Kryer</button>
+                                    </form>
+                                    <form method="POST" action="" style="display:inline;">
+                                        <input type="hidden" name="appointment_id" value="<?= $app['id'] ?>">
+                                        <input type="hidden" name="action" value="pakryer">
+                                        <button type="submit" class="btn" style="background:var(--yellow); color:white; font-size:12px; padding:5px 12px;">✕ Pa Kryer</button>
+                                    </form>
+                                </div>
+                            <?php else: ?>
+                                <span style="font-size:12px; color:var(--text-soft); font-style:italic;">Konfirmo fillimisht</span>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </td>
                 </tr>
