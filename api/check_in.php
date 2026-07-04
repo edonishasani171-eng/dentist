@@ -485,18 +485,22 @@ try {
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?php if (empty($s['check_in_time']) || !empty($s['check_out_time'])): ?>
-                                        <form method="POST" style="display:inline;">
-                                            <input type="hidden" name="user_id" value="<?= $s['id'] ?>">
-                                            <input type="hidden" name="action" value="staff_checkin">
-                                            <button type="submit" class="btn btn-approve">Check In</button>
-                                        </form>
+                                    <?php if (!$is_admin): ?>
+                                        <?php if (empty($s['check_in_time']) || !empty($s['check_out_time'])): ?>
+                                            <form method="POST" style="display:inline;">
+                                                <input type="hidden" name="user_id" value="<?= $s['id'] ?>">
+                                                <input type="hidden" name="action" value="staff_checkin">
+                                                <button type="submit" class="btn btn-approve">Check In</button>
+                                            </form>
+                                        <?php else: ?>
+                                            <form method="POST" style="display:inline;">
+                                                <input type="hidden" name="user_id" value="<?= $s['id'] ?>">
+                                                <input type="hidden" name="action" value="staff_checkout">
+                                                <button type="submit" class="btn btn-cancel">Check Out</button>
+                                            </form>
+                                        <?php endif; ?>
                                     <?php else: ?>
-                                        <form method="POST" style="display:inline;">
-                                            <input type="hidden" name="user_id" value="<?= $s['id'] ?>">
-                                            <input type="hidden" name="action" value="staff_checkout">
-                                            <button type="submit" class="btn btn-cancel">Check Out</button>
-                                        </form>
+                                        <span style="font-size:13px; color:var(--text-soft);">—</span>
                                     <?php endif; ?>
                                 </td>
                             </tr>

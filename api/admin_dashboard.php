@@ -244,6 +244,7 @@ try {
         'total_patients' => count($appointments), 
         'today_appointments' => count($appointments)
     ];
+    $new_appointments_count = $pending_count;
 
     // ✅ KETU DUHET TE JETË: Leximi i emrit të stafit të kyçur (Jashtë bllokut catch)
     $staff_name = "Admin Staf"; // Emri rezervë nëse diçka dështon
@@ -1036,6 +1037,35 @@ try {
             font-size: 22px;
         }
     }
+    /* ── NOTIFICATION BADGE ── */
+        .menu-item a {
+            position: relative;
+        }
+
+        .notif-badge {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: #df473c;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            line-height: 1;
+            pointer-events: none;
+            transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), opacity 0.2s ease;
+        }
+
+        .notif-badge.hidden {
+            transform: scale(0);
+            opacity: 0;
+        }
     </style>
 </head>
 <body>
@@ -1065,9 +1095,14 @@ try {
 
         <ul class="menu">
             <li class="menu-item <?= $current_page === 'dashboard' ? 'active' : '' ?>">
-                <a href="admin_dashboard.php?page=dashboard">
+                <a href="admin_dashboard.php?page=dashboard" id="dashboardLink">
                     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                     Dashboard
+                    <?php if ($new_appointments_count > 0): ?>
+                        <span class="notif-badge" id="notifBadge">
+                            <?= $new_appointments_count > 99 ? '99+' : $new_appointments_count ?>
+                        </span>
+                    <?php endif; ?>
                 </a>
             </li>
             <li class="menu-item <?= $current_page === 'appointments' ? 'active' : '' ?>">
@@ -1603,6 +1638,33 @@ try {
         }
     }, interval);
 }
+// ── NOTIFICATION BADGE DISMISS ──
+document.addEventListener('DOMContentLoaded', function() {
+    const badge = document.getElementById('notifBadge');
+    const dashLink = document.getElementById('dashboardLink');
+
+    if (!badge || !dashLink) return;
+
+    // If already on dashboard page, hide it immediately
+    const urlParams = new URLSearchParams(window.location.search);
+    const page = urlParams.get('page');
+    if (page === 'dashboard' || page === null) {
+        badge.classList.add('hidden');
+        localStorage.setItem('dashNotifDismissed', '<?= $pending_count ?>');
+    }
+
+    // Hide when clicked
+    dashLink.addEventListener('click', function() {
+        badge.classList.add('hidden');
+        localStorage.setItem('dashNotifDismissed', '<?= $pending_count ?>');
+    });
+
+    // Check if user already dismissed this count
+    const dismissed = localStorage.getItem('dashNotifDismissed');
+    if (dismissed && parseInt(dismissed) >= <?= $pending_count ?>) {
+        badge.classList.add('hidden');
+    }
+});
 </script>
 </body>
 </html>
