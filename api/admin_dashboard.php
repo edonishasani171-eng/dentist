@@ -1086,6 +1086,8 @@ try {
         /* ── CARD HOVER EFFECT ── */
         .card {
             transition: transform 0.15s ease, box-shadow 0.15s ease;
+            onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 24px rgba(26,122,94,0.15)';"
+            onmouseout="this.style.transform='';this.style.boxShadow='';"
         }
 
         .card:hover {
@@ -1304,15 +1306,24 @@ try {
 
     <!-- Stat boxes -->
     <div style="display:flex; gap:16px; margin-bottom:24px; flex-wrap:wrap;">
-        <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; gap:4px; min-width:110px; cursor:pointer;" onclick="filterAppByKryer('pakryer')">
+        <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; gap:4px; min-width:110px; cursor:pointer; transition:transform 0.15s ease, box-shadow 0.15s ease;"
+            onclick="filterAppByKryer('pakryer')"
+            onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 24px rgba(26,122,94,0.15)';"
+            onmouseout="this.style.transform='';this.style.boxShadow='';">
             <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-soft); font-weight:500;">Pa Kryer</span>
             <span style="font-family:'DM Serif Display',serif; font-size:26px; color:var(--yellow);"><?= $pa_kryer_count ?></span>
         </div>
-        <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; gap:4px; min-width:110px; cursor:pointer;" onclick="filterAppByKryer('kryer')">
+        <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; gap:4px; min-width:110px; cursor:pointer; transition:transform 0.15s ease, box-shadow 0.15s ease;"
+            onclick="filterAppByKryer('kryer')"
+            onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 24px rgba(26,122,94,0.15)';"
+            onmouseout="this.style.transform='';this.style.boxShadow='';">
             <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-soft); font-weight:500;">Kryer</span>
             <span style="font-family:'DM Serif Display',serif; font-size:26px; color:var(--green);"><?= $kryer_count ?></span>
         </div>
-        <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; gap:4px; min-width:110px; cursor:pointer;" onclick="filterAppByStatus('Cancelled')">
+        <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; gap:4px; min-width:110px; cursor:pointer; transition:transform 0.15s ease, box-shadow 0.15s ease;"
+            onclick="filterAppByStatus('Cancelled')"
+            onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 24px rgba(26,122,94,0.15)';"
+            onmouseout="this.style.transform='';this.style.boxShadow='';">
             <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-soft); font-weight:500;">Anuluar</span>
             <span style="font-family:'DM Serif Display',serif; font-size:26px; color:var(--orange);"><?= $cancelled_count ?></span>
         </div>
@@ -1820,7 +1831,7 @@ try {
                 .catch(err => console.log('Poll error:', err));
         }
 
-        setInterval(checkNewAppointments, 300000);
+        setInterval(checkNewAppointments, 120000);
     })();
 
     // ── TOAST NOTIFICATION ──
