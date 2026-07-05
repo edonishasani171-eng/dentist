@@ -1141,6 +1141,12 @@ try {
                     Aplikimet
                 </a>
             </li>
+            <li class="menu-item <?= $current_page === 'register_patient' ? 'active' : '' ?>">
+                <a href="register_patient.php">
+                    <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="22" y1="11" x2="16" y2="11"></line></svg>
+                    Regjistrimi i Pacientit
+                </a>
+            </li>
             <li class="menu-item <?= $current_page === 'schedules' ? 'active' : '' ?>">
                 <a href="admin_dashboard.php?page=schedules">
                     <svg viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 6v6l4 2"></path></svg>
