@@ -207,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // Fetch live metrics and rows from the database
 try {
     // 1. Fetch appointments
-    $query = "SELECT id, patient, email, phone, service, date, time, notes, status, kryer FROM appointments ORDER BY id DESC";
+    $query = "SELECT id, patient, email, phone, service, date, time, notes, status, kryer FROM appointments ORDER BY id ASC";
     $stmt = $pdo->query($query);
     $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -1535,7 +1535,12 @@ try {
     }
 
     function closeModal() {
+        const scrollY = document.body.style.top;
         document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
         document.getElementById('detailsModal').classList.remove('active');
     }
 
@@ -1562,7 +1567,10 @@ try {
         const submitBtn = document.getElementById('confirmSubmitBtn'); // Fixed ID mismatch
 
         targetFormToSubmit = formElement;
+        document.body.style.top = `-${window.scrollY}px`;
+        document.body.style.position = 'fixed';
         document.body.style.overflow = 'hidden';
+        document.body.style.width = '100%';
 
         if (actionType === 'cancel') {
             icon.innerHTML = '🛑';
@@ -1586,7 +1594,12 @@ try {
     }
 
     function closeConfirmModal() {
+        const scrollY = document.body.style.top;
         document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
         document.getElementById('confirmModal').classList.remove('active');
         targetFormToSubmit = null;
     }
