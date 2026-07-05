@@ -643,6 +643,7 @@ try {
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.2s ease;
+            overflow: hidden;
         }
 
         .modal-overlay.active {
@@ -1101,11 +1102,13 @@ try {
                 <a href="admin_dashboard.php?page=dashboard" id="dashboardLink">
                     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                     Dashboard
-                    <?php if ($new_appointments_count > 0): ?>
-                        <span class="notif-badge" id="notifBadge">
-                            <?= $new_appointments_count > 99 ? '99+' : $new_appointments_count ?>
-                        </span>
-                    <?php endif; ?>
+                    <span
+                        class="notif-badge <?= $new_appointments_count == 0 ? 'hidden' : '' ?>"
+                        id="notifBadge">
+
+                        <?= $new_appointments_count > 99 ? '99+' : $new_appointments_count ?>
+
+                    </span>
                 </a>
             </li>
             <li class="menu-item <?= $current_page === 'appointments' ? 'active' : '' ?>">
@@ -1197,7 +1200,7 @@ try {
                     </thead>
                     <tbody>
                         <?php foreach ($appointments as $app): ?>
-                        <tr>
+                        <tr data-id="<?= $app['id'] ?>">
                             <td>
                                 <div class="patient-name"><?= htmlspecialchars($app['patient']) ?></div>
                                 <div class="patient-phone"><?= htmlspecialchars($app['phone']) ?></div>
@@ -1527,6 +1530,7 @@ try {
     }
 
     function closeModal() {
+        document.body.style.overflow = '';
         document.getElementById('detailsModal').classList.remove('active');
     }
 
@@ -1553,6 +1557,7 @@ try {
         const submitBtn = document.getElementById('confirmSubmitBtn'); // Fixed ID mismatch
 
         targetFormToSubmit = formElement;
+        document.body.style.overflow = 'hidden';
 
         if (actionType === 'cancel') {
             icon.innerHTML = '🛑';
@@ -1576,6 +1581,7 @@ try {
     }
 
     function closeConfirmModal() {
+        document.body.style.overflow = '';
         document.getElementById('confirmModal').classList.remove('active');
         targetFormToSubmit = null;
     }
@@ -1649,6 +1655,36 @@ try {
         }
     }, interval);
 };
+checkForUpdates();
+
+setInterval(checkForUpdates, 5000);
+
+function checkForUpdates() {
+
+    fetch('check_updates.php')
+    .then(response => response.json())
+    .then(data => {
+
+        const badge = document.getElementById("notifBadge");
+
+        if (!badge) return;
+
+        if (data.count > 0) {
+
+            badge.classList.remove("hidden");
+
+            badge.innerHTML =
+                data.count > 99 ? "99+" : data.count;
+
+        } else {
+
+            badge.classList.add("hidden");
+
+        }
+
+    });
+
+}
 </script>
 </body>
 </html>
