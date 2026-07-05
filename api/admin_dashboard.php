@@ -313,10 +313,8 @@ try {
             background: var(--cream);
             color: var(--text);
             display: flex;
-            min-height: 100vh;
-            overflow-x: hidden;
-            overflow-y: auto;
-            overflow-x: hidden;
+            height: 100vh;
+            overflow: hidden;
             opacity: 0;
             transform: translateY(10px);
             transition: opacity 0.4s ease-out, transform 0.4s ease-out;
@@ -429,6 +427,8 @@ try {
             flex: 1;
             padding: 40px 48px;
             z-index: 1;
+            overflow-y: auto;
+            height: 100vh;
         }
 
         header {
@@ -1541,7 +1541,6 @@ try {
     }
 
     function closeModal() {
-        document.body.style.overflow = '';
         document.getElementById('detailsModal').classList.remove('active');
     }
 
@@ -1568,7 +1567,6 @@ try {
         const submitBtn = document.getElementById('confirmSubmitBtn'); // Fixed ID mismatch
 
         targetFormToSubmit = formElement;
-        document.body.style.overflow = 'hidden';
 
         if (actionType === 'cancel') {
             icon.innerHTML = '🛑';
@@ -1592,7 +1590,6 @@ try {
     }
 
     function closeConfirmModal() {
-        document.body.style.overflow = '';
         document.getElementById('confirmModal').classList.remove('active');
         targetFormToSubmit = null;
     }
