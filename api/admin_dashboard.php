@@ -1070,6 +1070,11 @@ try {
             transform: scale(0);
             opacity: 0;
         }
+        /* ── ANIMATION FOR NEW APPLICATIONS ── */
+        @keyframes highlightNew {
+            0%   { background: #e8f5f1; }
+            100% { background: transparent; }
+        }
     </style>
 </head>
 <body>
@@ -1654,37 +1659,151 @@ try {
             bar.style.width = '100%';
         }
     }, interval);
-};
-checkForUpdates();
+}
+// ── LIVE UPDATES VIA POLLING ──
+    (function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const page = urlParams.get('page');
+        if (page !== 'dashboard' && page !== null) return;
 
-setInterval(checkForUpdates, 5000);
+        let lastId = 0;
+        document.querySelectorAll('table tbody tr[data-id]').forEach(row => {
+            const id = parseInt(row.getAttribute('data-id') || '0');
+            if (id > lastId) lastId = id;
+        });
 
-function checkForUpdates() {
+        function checkNewAppointments() {
+            fetch(`check_new.php?last_id=${lastId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.appointments || data.appointments.length === 0) return;
 
-    fetch('check_updates.php')
-    .then(response => response.json())
-    .then(data => {
+                    lastId = data.last_id;
 
-        const badge = document.getElementById("notifBadge");
+                    showToast(`${data.appointments.length} aplikim i ri!`);
 
-        if (!badge) return;
+                    const badge = document.getElementById('notifBadge');
+                    if (badge) {
+                        badge.classList.remove('hidden');
+                        const current = parseInt(badge.textContent) || 0;
+                        const newCount = current + data.appointments.length;
+                        badge.textContent = newCount > 99 ? '99+' : newCount;
+                    } else {
+                        const dashLink = document.getElementById('dashboardLink');
+                        if (dashLink) {
+                            const newBadge = document.createElement('span');
+                            newBadge.id = 'notifBadge';
+                            newBadge.className = 'notif-badge';
+                            newBadge.textContent = data.appointments.length > 99 ? '99+' : data.appointments.length;
+                            dashLink.appendChild(newBadge);
+                        }
+                    }
 
-        if (data.count > 0) {
+                    const tbody = document.querySelector('main table tbody');
+                    const noResultsRow = document.getElementById('noResultsRow');
 
-            badge.classList.remove("hidden");
+                    data.appointments.forEach(app => {
+                        const statusBadge = app.status === 'Pending'
+                            ? `<span class="badge badge-pending">⏳ Në pritje</span>`
+                            : app.status === 'Cancelled'
+                            ? `<span class="badge badge-cancelled">✕ Anuluar</span>`
+                            : `<span class="badge badge-confirmed">✓ Konfirmuar</span>`;
 
-            badge.innerHTML =
-                data.count > 99 ? "99+" : data.count;
+                        const confirmBtn = app.status === 'Pending' ? `
+                            <form method="POST" action="" style="display:inline;">
+                                <input type="hidden" name="appointment_id" value="${app.id}">
+                                <input type="hidden" name="action" value="confirm">
+                                <button type="submit" class="btn btn-approve">Konfirmo</button>
+                            </form>
+                            <form id="cancel-form-${app.id}" method="POST" action="" style="display:inline;">
+                                <input type="hidden" name="appointment_id" value="${app.id}">
+                                <input type="hidden" name="action" value="cancel">
+                                <button type="button" class="btn btn-cancel" onclick="triggerCustomConfirm('cancel', ${app.id})">Anulo</button>
+                            </form>` : '';
 
-        } else {
+                        const row = document.createElement('tr');
+                        row.setAttribute('data-id', app.id);
+                        row.style.cssText = 'animation: highlightNew 2s ease;';
+                        row.innerHTML = `
+                            <td>
+                                <div class="patient-name">${app.patient}</div>
+                                <div class="patient-phone">${app.phone || ''}</div>
+                                <div style="font-size:12px;color:var(--text-soft);">${app.email || ''}</div>
+                            </td>
+                            <td>${app.service}</td>
+                            <td>
+                                <div>${app.date}</div>
+                                <div style="font-size:13px;color:var(--text-soft);">${app.time}</div>
+                            </td>
+                            <td>${statusBadge}</td>
+                            <td>
+                                <div class="actions">
+                                    ${confirmBtn}
+                                    <form id="delete-form-${app.id}" method="POST" action="" style="display:inline;">
+                                        <input type="hidden" name="appointment_id" value="${app.id}">
+                                        <input type="hidden" name="action" value="delete">
+                                        <button type="button" class="btn btn-delete" onclick="triggerCustomConfirm('delete', ${app.id})">Fshije</button>
+                                    </form>
+                                    <button class="btn btn-secondary" onclick="showDetails(${JSON.stringify(app)})">View</button>
+                                </div>
+                            </td>`;
 
-            badge.classList.add("hidden");
-
+                        if (noResultsRow) {
+                            tbody.insertBefore(row, noResultsRow);
+                        } else {
+                            tbody.insertAdjacentElement('afterbegin', row);
+                        }
+                    });
+                })
+                .catch(err => console.log('Poll error:', err));
         }
 
-    });
+        setInterval(checkNewAppointments, 10000);
+    })();
 
-}
+    // ── TOAST NOTIFICATION ──
+    function showToast(message) {
+        const existing = document.getElementById('liveToast');
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        toast.id = 'liveToast';
+        toast.style.cssText = `
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: var(--green);
+            color: white;
+            padding: 14px 22px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 8px 24px rgba(26,122,94,0.3);
+            z-index: 99999;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        `;
+        toast.innerHTML = `
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            ${message}
+        `;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.transform = 'translateY(0)';
+            toast.style.opacity = '1';
+        }, 10);
+
+        setTimeout(() => {
+            toast.style.transform = 'translateY(20px)';
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
 </script>
 </body>
 </html>
