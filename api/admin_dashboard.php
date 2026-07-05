@@ -315,6 +315,8 @@ try {
             display: flex;
             min-height: 100vh;
             overflow-x: hidden;
+            overflow-y: auto;
+            overflow-x: hidden;
             opacity: 0;
             transform: translateY(10px);
             transition: opacity 0.4s ease-out, transform 0.4s ease-out;
@@ -426,7 +428,6 @@ try {
         main {
             flex: 1;
             padding: 40px 48px;
-            overflow-y: scroll;
             z-index: 1;
         }
 
@@ -635,6 +636,8 @@ try {
             position: fixed;
             top: 0;
             left: 0;
+            right: 0;
+            bottom: 0;
             width: 100vw;
             height: 100vh;
             background: rgba(0, 0, 0, 0.45);
