@@ -302,8 +302,11 @@ try {
             margin: 0; 
             padding: 0; 
         }
-
-        html { scroll-behavior: smooth; }
+        
+        html {
+            background: var(--cream);
+            scroll-behavior: smooth;
+        }
 
         body {
             font-family: 'DM Sans', sans-serif;
@@ -311,7 +314,7 @@ try {
             color: var(--text);
             display: flex;
             min-height: 100vh;
-            overflow: hidden;
+            overflow-x: hidden;
             opacity: 0;
             transform: translateY(10px);
             transition: opacity 0.4s ease-out, transform 0.4s ease-out;
@@ -1681,6 +1684,7 @@ try {
                     lastId = data.last_id;
 
                     showToast(`${data.appointments.length} aplikim i ri!`);
+                    playNotifSound();
 
                     const badge = document.getElementById('notifBadge');
                     if (badge) {
@@ -1804,6 +1808,39 @@ try {
             setTimeout(() => toast.remove(), 300);
         }, 4000);
     }
+    // ── NOTIFICATION SOUND ──
+function playNotifSound() {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // First tone
+        const osc1 = ctx.createOscillator();
+        const gain1 = ctx.createGain();
+        osc1.connect(gain1);
+        gain1.connect(ctx.destination);
+        osc1.frequency.value = 880;
+        osc1.type = 'sine';
+        gain1.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        osc1.start(ctx.currentTime);
+        osc1.stop(ctx.currentTime + 0.3);
+
+        // Second tone (slightly higher, plays after first)
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.frequency.value = 1100;
+        osc2.type = 'sine';
+        gain2.gain.setValueAtTime(0.3, ctx.currentTime + 0.15);
+        gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+        osc2.start(ctx.currentTime + 0.15);
+        osc2.stop(ctx.currentTime + 0.5);
+
+    } catch(e) {
+        console.log('Audio not supported:', e);
+    }
+}
 </script>
 </body>
 </html>
