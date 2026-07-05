@@ -207,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // Fetch live metrics and rows from the database
 try {
     // 1. Fetch appointments
-    $query = "SELECT id, patient, email, phone, service, date, time, notes, status, kryer FROM appointments ORDER BY id ASC";
+    $query = "SELECT id, patient, email, phone, service, date, time, notes, status, kryer FROM appointments ORDER BY id DESC";
     $stmt = $pdo->query($query);
     $appointments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -311,7 +311,7 @@ try {
             color: var(--text);
             display: flex;
             min-height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
             opacity: 0;
             transform: translateY(10px);
             transition: opacity 0.4s ease-out, transform 0.4s ease-out;
@@ -423,7 +423,7 @@ try {
         main {
             flex: 1;
             padding: 40px 48px;
-            overflow-y: auto;
+            overflow-y: scroll;
             z-index: 1;
         }
 
@@ -1535,12 +1535,7 @@ try {
     }
 
     function closeModal() {
-        const scrollY = document.body.style.top;
         document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
         document.getElementById('detailsModal').classList.remove('active');
     }
 
@@ -1567,10 +1562,7 @@ try {
         const submitBtn = document.getElementById('confirmSubmitBtn'); // Fixed ID mismatch
 
         targetFormToSubmit = formElement;
-        document.body.style.top = `-${window.scrollY}px`;
-        document.body.style.position = 'fixed';
         document.body.style.overflow = 'hidden';
-        document.body.style.width = '100%';
 
         if (actionType === 'cancel') {
             icon.innerHTML = '🛑';
@@ -1594,12 +1586,7 @@ try {
     }
 
     function closeConfirmModal() {
-        const scrollY = document.body.style.top;
         document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.top = '';
-        document.body.style.width = '';
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
         document.getElementById('confirmModal').classList.remove('active');
         targetFormToSubmit = null;
     }
