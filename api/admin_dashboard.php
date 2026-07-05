@@ -514,6 +514,8 @@ try {
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow);
             overflow: hidden;
+            max-height: 520px;
+            overflow-y: auto;
         }
 
         table {
@@ -532,6 +534,9 @@ try {
             text-transform: uppercase;
             font-size: 11px;
             letter-spacing: 0.05em;
+            position: sticky;
+            top: 0;
+            z-index: 2;
         }
 
         td {
@@ -1044,32 +1049,28 @@ try {
             font-size: 22px;
         }
     }
-    /* ── NOTIFICATION BADGE ── */
-        .menu-item {
-            position: relative;
-        }
-
+        /* ── NOTIFICATION BADGE ── */
         .notif-badge {
-            position: absolute;
-            top: 12px;
-            right: 18px;
-
-            width: 18px;
-            height: 18px;
-
-            background: #e53935;
-            border: 2px solid #fff;
-            border-radius: 50%;
-
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-
+            margin-left: auto;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 4px;
+            background: #e53935;
+            border: 2px solid #fff;
+            border-radius: 50px;
             color: #fff;
             font-size: 10px;
             font-weight: bold;
-
             z-index: 100;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .notif-badge.hidden {
+            transform: scale(0);
+            opacity: 0;
         }
 
         .notif-badge.hidden {
@@ -1078,8 +1079,18 @@ try {
         }
         /* ── ANIMATION FOR NEW APPLICATIONS ── */
         @keyframes highlightNew {
-            0%   { background: #e8f5f1; }
-            100% { background: transparent; }
+            0%   { opacity: 0; transform: translateY(-8px); background: #e8f5f1; }
+            30%  { opacity: 1; transform: translateY(0); background: #e8f5f1; }
+            100% { opacity: 1; transform: translateY(0); background: transparent; }
+        }
+        /* ── CARD HOVER EFFECT ── */
+        .card {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(26,122,94,0.15);
         }
     </style>
 </head>
@@ -1171,19 +1182,19 @@ try {
             </header>
 
             <div class="metrics-grid">
-                <div class="card">
+                <div class="card" style="cursor:pointer;" onclick="filterTableByStatus('all')">
                     <div class="card-meta">Totali i Sotem</div>
                     <div class="card-value"><?= $metrics['today_appointments'] ?></div>
                 </div>
-                <div class="card">
+                <div class="card" style="cursor:pointer;" onclick="filterTableByStatus('Pending')">
                     <div class="card-meta">Në pritje</div>
                     <div class="card-value" style="color: var(--yellow);"><?= $metrics['pending'] ?></div>
                 </div>
-                <div class="card">
+                <div class="card" style="cursor:pointer;" onclick="filterTableByStatus('Confirmed')">
                     <div class="card-meta">Konfirmuar</div>
                     <div class="card-value" style="color: var(--green);"><?= $metrics['confirmed'] ?></div>
                 </div>
-                <div class="card">
+                <div class="card" style="cursor:pointer;" onclick="filterTableByStatus('all')">
                     <div class="card-meta">Totali i Pacientëve</div>
                     <div class="card-value"><?= number_format($metrics['total_patients']) ?></div>
                 </div>
@@ -1191,11 +1202,21 @@ try {
 
             <div class="table-header-container">
                 <h2 class="section-title">Aplikimet e tashme</h2>
-                <div class="search-box-wrapper">
-                    <span class="search-icon">
-                        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    </span>
-                    <input type="text" id="patientSearch" placeholder="Kerko me emer, nr.telefonit ose email" onkeyup="filterTable()">
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <input type="date" id="dashDateFilter" onchange="filterTable()"
+                        style="padding:9px 12px; font-size:13px; font-family:'DM Sans',sans-serif; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--white); color:var(--text); outline:none; transition:all 0.2s;"
+                        onfocus="this.style.borderColor='var(--green)'; this.style.boxShadow='0 0 0 3px rgba(26,122,94,0.12)';"
+                        onblur="this.style.borderColor=''; this.style.boxShadow='';">
+                    <button onclick="document.getElementById('dashDateFilter').value=''; filterTable();"
+                        style="padding:9px 12px; font-size:13px; font-family:'DM Sans',sans-serif; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--cream); color:var(--text-soft); cursor:pointer;">
+                        Pastro
+                    </button>
+                    <div class="search-box-wrapper">
+                        <span class="search-icon">
+                            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        </span>
+                        <input type="text" id="patientSearch" placeholder="Kerko me emer, nr.telefonit ose email" onkeyup="filterTable()">
+                    </div>
                 </div>
             </div>
             <div class="table-container">
@@ -1283,30 +1304,40 @@ try {
 
     <!-- Stat boxes -->
     <div style="display:flex; gap:16px; margin-bottom:24px; flex-wrap:wrap;">
-        <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; gap:4px; min-width:110px;">
+        <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; gap:4px; min-width:110px; cursor:pointer;" onclick="filterAppByKryer('pakryer')">
             <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-soft); font-weight:500;">Pa Kryer</span>
             <span style="font-family:'DM Serif Display',serif; font-size:26px; color:var(--yellow);"><?= $pa_kryer_count ?></span>
         </div>
-        <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; gap:4px; min-width:110px;">
+        <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; gap:4px; min-width:110px; cursor:pointer;" onclick="filterAppByKryer('kryer')">
             <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-soft); font-weight:500;">Kryer</span>
             <span style="font-family:'DM Serif Display',serif; font-size:26px; color:var(--green);"><?= $kryer_count ?></span>
         </div>
-        <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; gap:4px; min-width:110px;">
+        <div style="background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:14px 24px; box-shadow:var(--shadow); display:flex; flex-direction:column; align-items:center; gap:4px; min-width:110px; cursor:pointer;" onclick="filterAppByStatus('Cancelled')">
             <span style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--text-soft); font-weight:500;">Anuluar</span>
             <span style="font-family:'DM Serif Display',serif; font-size:26px; color:var(--orange);"><?= $cancelled_count ?></span>
         </div>
     </div>
 
     <!-- Search bar -->
-    <div style="margin-bottom:16px; position:relative; display:inline-flex; align-items:center;">
-        <span style="position:absolute; left:12px; pointer-events:none;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-soft)" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        </span>
-        <input type="text" id="appSearch" placeholder="Kerko me emer, email ose nr.telefoni"
-            onkeyup="filterAppTable()"
-            style="width:320px; padding:10px 16px 10px 36px; font-size:13px; font-family:'DM Sans',sans-serif; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--white); color:var(--text); outline:none; transition:all 0.2s;"
-            onfocus="this.style.borderColor='var(--green)'; this.style.boxShadow='0 0 0 3px rgba(26,122,94,0.15)';"
+    <div style="margin-bottom:16px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div style="position:relative; display:inline-flex; align-items:center;">
+            <span style="position:absolute; left:12px; pointer-events:none;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-soft)" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </span>
+            <input type="text" id="appSearch" placeholder="Kerko me emer, email ose nr.telefoni"
+                onkeyup="filterAppTable()"
+                style="width:280px; padding:10px 16px 10px 36px; font-size:13px; font-family:'DM Sans',sans-serif; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--white); color:var(--text); outline:none; transition:all 0.2s;"
+                onfocus="this.style.borderColor='var(--green)'; this.style.boxShadow='0 0 0 3px rgba(26,122,94,0.15)';"
+                onblur="this.style.borderColor=''; this.style.boxShadow='';">
+        </div>
+        <input type="date" id="appDateFilter" onchange="filterAppTable()"
+            style="padding:9px 12px; font-size:13px; font-family:'DM Sans',sans-serif; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--white); color:var(--text); outline:none; transition:all 0.2s;"
+            onfocus="this.style.borderColor='var(--green)'; this.style.boxShadow='0 0 0 3px rgba(26,122,94,0.12)';"
             onblur="this.style.borderColor=''; this.style.boxShadow='';">
+        <button onclick="document.getElementById('appDateFilter').value=''; filterAppTable();"
+            style="padding:9px 12px; font-size:13px; font-family:'DM Sans',sans-serif; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--cream); color:var(--text-soft); cursor:pointer;">
+            Pastro
+        </button>
     </div>
 
     <div class="table-container">
@@ -1466,42 +1497,59 @@ try {
 <script>
     // --- EXISTING FILTER TABLE LOGIC ---
     function filterTable() {
-        const input = document.getElementById('patientSearch');
-        const filter = input.value.toLowerCase();
-        
-        const rows = document.querySelectorAll('main table tbody tr:not(#noResultsRow)');
-        const noResultsRow = document.getElementById('noResultsRow');
-        
-        let visibleCount = 0;
+    const nameFilter = (document.getElementById('patientSearch')?.value || '').toLowerCase();
+    const dateFilter = document.getElementById('dashDateFilter')?.value || '';
 
-        rows.forEach(row => {
-            const detailsCell = row.querySelector('td:first-child');
-            if (detailsCell) {
-                const textValue = detailsCell.textContent || detailsCell.innerText;
-                if (textValue.toLowerCase().indexOf(filter) > -1) {
-                    row.style.display = "";
-                    visibleCount++;
-                } else {
-                    row.style.display = "none";
-                }
-            }
-        });
+    const rows = document.querySelectorAll('main table tbody tr:not(#noResultsRow)');
+    const noResultsRow = document.getElementById('noResultsRow');
+    let visibleCount = 0;
 
-        if (visibleCount === 0) {
-            noResultsRow.style.display = "";
-        } else {
-            noResultsRow.style.display = "none";
+    rows.forEach(row => {
+        const nameCell = row.querySelector('td:first-child');
+        const dateCell = row.querySelector('td:nth-child(3)');
+        const nameMatch = nameCell ? nameCell.textContent.toLowerCase().includes(nameFilter) : true;
+        
+        let dateMatch = true;
+        if (dateFilter && dateCell) {
+            // Date cell contains formatted date like "Jul 08, 2026"
+            // We compare against the data-id row's date via the cell text
+            const cellText = dateCell.textContent.trim();
+            // Convert filter date (2026-07-08) to comparable format
+            const filterDate = new Date(dateFilter);
+            const filterStr = filterDate.toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+            dateMatch = cellText.includes(filterStr);
         }
+
+        if (nameMatch && dateMatch) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    if (noResultsRow) noResultsRow.style.display = visibleCount === 0 ? '' : 'none';
     }
     function filterAppTable() {
-    const filter = document.getElementById('appSearch').value.toLowerCase();
+    const filter = (document.getElementById('appSearch')?.value || '').toLowerCase();
+    const dateFilter = document.getElementById('appDateFilter')?.value || '';
     const rows = document.querySelectorAll('#appTable tbody tr:not(#noAppResults)');
     const noResults = document.getElementById('noAppResults');
     let visible = 0;
 
     rows.forEach(row => {
         const searchVal = row.getAttribute('data-search') || '';
-        if (searchVal.includes(filter)) {
+        const nameMatch = searchVal.includes(filter);
+
+        let dateMatch = true;
+        if (dateFilter) {
+            const dateCell = row.querySelector('td:nth-child(5)');
+            if (dateCell) {
+                dateMatch = dateCell.textContent.includes(dateFilter);
+            }
+        }
+
+        if (nameMatch && dateMatch) {
             row.style.display = '';
             visible++;
         } else {
@@ -1605,6 +1653,10 @@ try {
         if (event.target == confirmOverlay) {
             closeConfirmModal();
         }
+        if (event.target === document.getElementById('logoutConfirmModal')) {
+            document.getElementById('logoutConfirmModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
     }
     // --- SMOOTH LOGOUT ANIMATION (matches login animation) ---
     document.addEventListener('DOMContentLoaded', function() {
@@ -1614,24 +1666,30 @@ try {
         logoutBtn.addEventListener('click', function(e) {
             e.preventDefault();
             const targetUrl = this.getAttribute('href');
-            const overlay = document.getElementById('loadingOverlay');
+            document.getElementById('logoutConfirmModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            document.getElementById('logoutConfirmYes').onclick = function() {
+                document.getElementById('logoutConfirmModal').classList.remove('active');
+                document.body.style.overflow = '';
+                
+                const overlay = document.getElementById('loadingOverlay');
+                overlay.classList.add('active');
+                animateProgress('logoutProgressBar', 500);
+                setTimeout(() => {
+                    const bar = document.getElementById('logoutProgressBar');
+                    if (bar) bar.style.width = '0%';
+                    animateProgress('logoutProgressBar', 2200);
+                }, 520);
+                setTimeout(() => {
+                    window.location.href = targetUrl;
+                }, 2800);
+            };
 
-            // Step 1: Fade the overlay in
-            overlay.classList.add('active');
-
-            // First quick run (mimics the login form-submit flash)
-            animateProgress('logoutProgressBar', 500);
-
-            // Second smooth run after reset (mimics the login PHP-return crawl)
-            setTimeout(() => {
-                const bar = document.getElementById('logoutProgressBar');
-                if (bar) bar.style.width = '0%';
-                animateProgress('logoutProgressBar', 2200);
-            }, 520);
-
-            setTimeout(() => {
-                window.location.href = targetUrl;
-            }, 2800);
+            document.getElementById('logoutConfirmNo').onclick = function() {
+                document.getElementById('logoutConfirmModal').classList.remove('active');
+                document.body.style.overflow = '';
+            };
         });
     }
 });
@@ -1727,7 +1785,7 @@ try {
 
                         const row = document.createElement('tr');
                         row.setAttribute('data-id', app.id);
-                        row.style.cssText = 'animation: highlightNew 2s ease;';
+                        row.style.cssText = 'animation: highlightNew 2s cubic-bezier(0.16,1,0.3,1) forwards;';
                         row.innerHTML = `
                             <td>
                                 <div class="patient-name">${app.patient}</div>
@@ -1762,7 +1820,7 @@ try {
                 .catch(err => console.log('Poll error:', err));
         }
 
-        setInterval(checkNewAppointments, 10000);
+        setInterval(checkNewAppointments, 300000);
     })();
 
     // ── TOAST NOTIFICATION ──
@@ -1841,6 +1899,79 @@ function playNotifSound() {
         console.log('Audio not supported:', e);
     }
 }
+// ── FILTER DASHBOARD TABLE BY STATUS ──
+function filterTableByStatus(status) {
+    const rows = document.querySelectorAll('main table tbody tr:not(#noResultsRow)');
+    const noResultsRow = document.getElementById('noResultsRow');
+    let visible = 0;
+
+    rows.forEach(row => {
+        if (status === 'all') {
+            row.style.display = '';
+            visible++;
+        } else {
+            const badge = row.querySelector('.badge');
+            const text = badge ? badge.textContent.trim() : '';
+            const match = (status === 'Pending' && text.includes('pritje')) ||
+                          (status === 'Confirmed' && text.includes('Konfirmuar')) ||
+                          (status === 'Cancelled' && text.includes('Anuluar'));
+            row.style.display = match ? '' : 'none';
+            if (match) visible++;
+        }
+    });
+
+    if (noResultsRow) {
+        noResultsRow.style.display = visible === 0 ? '' : 'none';
+    }
+}
+
+// ── FILTER APLIKIMET TABLE BY STATUS ──
+function filterAppByStatus(status) {
+    const rows = document.querySelectorAll('#appTable tbody tr:not(#noAppResults)');
+    const noResults = document.getElementById('noAppResults');
+    let visible = 0;
+
+    rows.forEach(row => {
+        const badge = row.querySelector('.badge');
+        const text = badge ? badge.textContent.trim() : '';
+        const match = (status === 'Cancelled' && text.includes('Anuluar'));
+        row.style.display = match ? '' : 'none';
+        if (match) visible++;
+    });
+
+    if (noResults) noResults.style.display = visible === 0 ? '' : 'none';
+}
+
+// ── FILTER APLIKIMET TABLE BY KRYER STATUS ──
+function filterAppByKryer(type) {
+    const rows = document.querySelectorAll('#appTable tbody tr:not(#noAppResults)');
+    const noResults = document.getElementById('noAppResults');
+    let visible = 0;
+
+    rows.forEach(row => {
+        const lastCell = row.querySelector('td:last-child');
+        const text = lastCell ? lastCell.textContent.trim() : '';
+        let match = false;
+        if (type === 'kryer') match = text.includes('Kryer') && !text.includes('Pa Kryer');
+        if (type === 'pakryer') match = text.includes('Pa Kryer');
+        row.style.display = match ? '' : 'none';
+        if (match) visible++;
+    });
+
+    if (noResults) noResults.style.display = visible === 0 ? '' : 'none';
+}
 </script>
+<!-- LOGOUT CONFIRM MODAL -->
+<div id="logoutConfirmModal" class="modal-overlay">
+    <div class="modal-box" style="max-width:400px; text-align:center;">
+        <div style="font-size:40px; margin-bottom:12px;">🚪</div>
+        <h3 style="font-family:'DM Serif Display',serif; font-size:22px; margin-bottom:10px;">Dal nga sistemi?</h3>
+        <p style="color:var(--text-mid); font-size:14px; line-height:1.5; margin-bottom:24px;">A jeni të sigurt që dëshironi të dilni nga paneli?</p>
+        <div style="display:flex; justify-content:center; gap:12px;">
+            <button id="logoutConfirmNo" type="button" class="btn" style="background:#6c757d; color:white; padding:10px 24px;">Jo</button>
+            <button id="logoutConfirmYes" type="button" class="btn" style="background:#c0392b; color:white; padding:10px 24px;">Po, Dil</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
