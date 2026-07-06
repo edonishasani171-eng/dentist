@@ -429,7 +429,7 @@ $current_page = 'register_pacient';
                 </a>
             </li>
             <li class="menu-item active">
-                <a href="register_pacient.php">
+                <a href="register_patient.php">
                     <svg viewBox="0 0 24 24"><path d="M9 12h6"></path><path d="M12 9v6"></path><rect x="3" y="4" width="18" height="16" rx="2"></rect></svg>
                     Regjistro Pacientin
                 </a>
