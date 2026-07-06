@@ -99,10 +99,10 @@ aside {
     opacity: 0;
 }
 
-.logout-item {
-    margin-top: 4px;
+.logout-btn {
+    margin-top: auto;
     border-top: 1px solid var(--border);
-    padding-top: 12px;
+    padding-top: 24px;
 }
 
 /* ── HAMBURGER TOGGLE (hidden on desktop) ── */
@@ -191,11 +191,14 @@ aside {
 
     .menu-item a { padding: 10px 20px; font-size: 14px; }
 
-    .logout-item {
-        margin-top: 4px;
+    .logout-btn {
+        margin-top: 0;
         border-top: 1px solid var(--border);
-        padding-top: 8px;
+        padding-top: 0;
+        padding-left: 0;
+        border-left: none;
+        width: 100%;
     }
 
-    .logout-item a { padding: 10px 20px; }
+    .logout-btn a { padding: 12px 20px; }
 }
