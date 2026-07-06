@@ -341,6 +341,8 @@ try {
         @media (max-width: 768px) {
             body { flex-direction: column; }
 
+            .menu-toggle { display: flex; }
+
             aside {
                 width: 100%;
                 height: auto;
@@ -355,9 +357,44 @@ try {
             }
 
             .brand { margin-bottom: 0; flex: 1; }
-            .menu { flex-direction: row; flex-wrap: wrap; gap: 4px; width: 100%; }
-            .menu-item a { padding: 8px 12px; font-size: 13px; }
-            .logout-btn { margin-top: 0; border-top: none; padding-top: 0; border-left: 1px solid var(--border); padding-left: 12px; }
+
+            .menu {
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: var(--white);
+                box-shadow: 0 10px 15px rgba(0,0,0,0.05);
+                border-bottom: 0 solid var(--border);
+                padding: 0;
+                max-height: 0;
+                opacity: 0;
+                overflow: hidden;
+                gap: 8px;
+                z-index: 1000;
+                transition: max-height 0.5s ease-in-out, opacity 0.3s ease-in-out, padding 0.4s ease-in-out;
+            }
+
+            .menu.active {
+                max-height: 500px;
+                opacity: 1;
+                padding: 16px 0;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .menu-item a { padding: 10px 20px; font-size: 14px; }
+
+            .logout-btn {
+                margin-top: 0;
+                border-top: 1px solid var(--border);
+                padding-top: 0;
+                padding-left: 0;
+                border-left: none;
+                width: 100%;
+            }
+
+            .logout-btn a { padding: 12px 20px; }
 
             main { padding: 20px 16px; }
 
@@ -373,6 +410,38 @@ try {
             .table-scroll { max-height: 360px; }
             table { min-width: 480px; }
         }
+        .menu-toggle {
+            display: none;
+            position: relative;
+            width: 24px;
+            height: 18px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            z-index: 1001;
+        }
+        .menu-toggle span {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--green);
+            border-radius: 2px;
+            transition: top 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
+        }
+        .menu-toggle span:nth-child(1) { top: 4px; }
+        .menu-toggle span:nth-child(2) { top: calc(100% - 7px); }
+        .menu-toggle.active span:nth-child(1) {
+            top: calc(50% - 1.5px);
+            transform: rotate(45deg);
+            background-color: var(--red);
+        }
+        .menu-toggle.active span:nth-child(2) {
+            top: calc(50% - 1.5px);
+            transform: rotate(-45deg);
+            background-color: var(--red);
+        }
     </style>
 </head>
 <body>
@@ -384,7 +453,12 @@ try {
             <span class="brand-text">Dent<span>Care</span></span>
         </a>
 
-        <ul class="menu">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Hap menunë">
+            <span></span>
+            <span></span>
+        </button>
+
+        <ul class="menu" id="nav-links">
             <li class="menu-item">
                 <a href="admin_dashboard.php?page=dashboard">
                     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
@@ -395,6 +469,12 @@ try {
                 <a href="admin_dashboard.php?page=appointments">
                     <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                     Aplikimet
+                </a>
+            </li>
+            <li class="menu-item active">
+                <a href="register_pacient.php">
+                    <svg viewBox="0 0 24 24"><path d="M9 12h6"></path><path d="M12 9v6"></path><rect x="3" y="4" width="18" height="16" rx="2"></rect></svg>
+                    Regjistro Pacientin
                 </a>
             </li>
             <li class="menu-item">
@@ -615,6 +695,28 @@ try {
 
             if (noResults) noResults.style.display = visible === 0 ? '' : 'none';
         }
+        document.addEventListener("DOMContentLoaded", function () {
+            const menuToggle = document.getElementById('menu-toggle');
+            const navLinks = document.getElementById('nav-links');
+            if (!menuToggle || !navLinks) return;
+            menuToggle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                navLinks.classList.toggle('active');
+                menuToggle.classList.toggle('active');
+            });
+            document.addEventListener('click', function(e) {
+                if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
+                    navLinks.classList.remove('active');
+                    menuToggle.classList.remove('active');
+                }
+            });
+            document.querySelectorAll('.menu a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('active');
+                    menuToggle.classList.remove('active');
+                });
+            });
+        });
     </script> 
 </body>
 </html>

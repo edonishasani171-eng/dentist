@@ -213,8 +213,20 @@ $current_page = 'register_pacient';
             background: var(--white);
             border: 1px solid var(--border);
             border-radius: var(--radius);
+            max-width: 700px;
+            margin: 0 auto;
             overflow: hidden;
             box-shadow: var(--shadow);
+        }
+        @media (max-width: 768px) {
+            main { 
+                padding: 20px 16px;
+             }
+        }
+        @media (max-width: 480px) {
+            main { 
+                padding: 16px 12px;
+             }
         }
 
         .form-section { padding: 28px 32px; border-bottom: 1px solid var(--border); }
@@ -333,11 +345,51 @@ $current_page = 'register_pacient';
 
         @media (max-width: 768px) {
             body { flex-direction: column; }
+
+            .menu-toggle { display: flex; }
+
             aside { width: 100%; height: auto; position: relative; padding: 16px 20px; flex-direction: row; align-items: center; flex-wrap: wrap; gap: 12px; border-right: none; border-bottom: 1px solid var(--border); }
+
             .brand { margin-bottom: 0; flex: 1; }
-            .menu { flex-direction: row; flex-wrap: wrap; gap: 4px; width: 100%; }
-            .menu-item a { padding: 8px 12px; font-size: 13px; }
-            .logout-btn { margin-top: 0; border-top: none; padding-top: 0; border-left: 1px solid var(--border); padding-left: 12px; }
+
+            .menu {
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: var(--white);
+                box-shadow: 0 10px 15px rgba(0,0,0,0.05);
+                border-bottom: 0 solid var(--border);
+                padding: 0;
+                max-height: 0;
+                opacity: 0;
+                overflow: hidden;
+                gap: 8px;
+                z-index: 1000;
+                transition: max-height 0.5s ease-in-out, opacity 0.3s ease-in-out, padding 0.4s ease-in-out;
+            }
+
+            .menu.active {
+                max-height: 500px;
+                opacity: 1;
+                padding: 16px 0;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .menu-item a { padding: 10px 20px; font-size: 14px; }
+
+            .logout-btn {
+                margin-top: 0;
+                border-top: 1px solid var(--border);
+                padding-top: 0;
+                padding-left: 0;
+                border-left: none;
+                width: 100%;
+            }
+
+            .logout-btn a { padding: 12px 20px; }
+
             main { padding: 20px 16px; }
             .form-row { grid-template-columns: 1fr; }
             .time-grid { grid-template-columns: repeat(3, 1fr); }
@@ -355,7 +407,12 @@ $current_page = 'register_pacient';
             <span class="brand-text">Dent<span>Care</span></span>
         </a>
 
-        <ul class="menu">
+        <button class="menu-toggle" id="menu-toggle" aria-label="Hap menunë">
+            <span></span>
+            <span></span>
+        </button>
+
+        <ul class="menu" id="nav-links">
             <li class="menu-item">
                 <a href="admin_dashboard.php?page=dashboard">
                     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
@@ -574,6 +631,28 @@ $current_page = 'register_pacient';
         document.getElementById(errId).style.display = show ? 'block' : 'none';
         document.getElementById(inputId).classList.toggle('error', show);
     }
+    document.addEventListener("DOMContentLoaded", function () {
+    const menuToggle = document.getElementById('menu-toggle');
+    const navLinks = document.getElementById('nav-links');
+    if (!menuToggle || !navLinks) return;
+    menuToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        navLinks.classList.toggle('active');
+        menuToggle.classList.toggle('active');
+    });
+    document.addEventListener('click', function(e) {
+        if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
+            navLinks.classList.remove('active');
+            menuToggle.classList.remove('active');
+        }
+    });
+    document.querySelectorAll('.menu a').forEach(link => {
+        link.addEventListener('click', () => {
+            navLinks.classList.remove('active');
+            menuToggle.classList.remove('active');
+        });
+    });
+});
 </script>
 </body>
 </html>
