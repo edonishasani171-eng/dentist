@@ -270,6 +270,7 @@ try {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="sidebar.css">
     <style>
         :root {
             --green:       #1a7a5e;
@@ -333,93 +334,6 @@ try {
         body.page-loaded {
             opacity: 1;
             transform: translateY(0);
-        }
-
-        /* ── SIDEBAR ── */
-        aside {
-            width: 260px;
-            background: var(--white);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            padding: 24px;
-            z-index: 10;
-        }
-
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            margin-bottom: 40px;
-            padding-left: 8px;
-        }
-
-        .brand-icon {
-            width: 32px;
-            height: 32px;
-            background: var(--green);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .brand-icon svg { 
-            width: 18px; 
-            height: 18px; 
-            fill: white; 
-        }
-
-        .brand-text {
-            font-family: 'DM Serif Display', serif;
-            font-size: 18px;
-            color: var(--text);
-            letter-spacing: -0.02em;
-        }
-
-        .brand-text span { color: var(--green); }
-
-        .menu {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .menu-item a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 14px;
-            color: var(--text-mid);
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 500;
-            border-radius: var(--radius-sm);
-            transition: all 0.2s;
-        }
-
-        .menu-item.active a, .menu-item a:hover {
-            background: var(--green-light);
-            color: var(--green-dark);
-        }
-
-        .menu-item a svg {
-            width: 18px;
-            height: 18px;
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 2;
-        }
-
-        .logout-btn {
-            margin-top: auto;
-            border-top: 1px solid var(--border);
-            padding-top: 24px;
         }
 
         /* ── MAIN CONTENT LAYER ── */
@@ -928,87 +842,8 @@ try {
             border-radius: 999px;
             transition: width 0.1s linear;
         }
-        /* ── HAMBURGER TOGGLE (hidden on desktop) ── */
-        .menu-toggle {
-            display: none;
-            position: relative;
-            width: 24px;
-            height: 18px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            padding: 0;
-            z-index: 1001;
-        }
-
-        .menu-toggle span {
-            position: absolute;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background-color: var(--green);
-            border-radius: 2px;
-            transition: top 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
-        }
-
-        .menu-toggle span:nth-child(1) { top: 4px; }
-        .menu-toggle span:nth-child(2) { top: calc(100% - 7px); }
-
-        .menu-toggle.active span:nth-child(1) {
-            top: calc(50% - 1.5px);
-            transform: rotate(45deg);
-            background-color: var(--red);
-        }
-
-        .menu-toggle.active span:nth-child(2) {
-            top: calc(50% - 1.5px);
-            transform: rotate(-45deg);
-            background-color: var(--red);
-        }
-                /* ── MOBILE RESPONSIVE FOR DASHBOARD ── */
+        /* ── MOBILE RESPONSIVE FOR DASHBOARD ── */
         @media (max-width: 768px) {
-            body {
-                flex-direction: column;
-            }
-
-            aside {
-                width: 100%;
-                height: auto;
-                position: relative;
-                padding: 16px 20px;
-                flex-direction: row;
-                align-items: center;
-                flex-wrap: wrap;
-                gap: 12px;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-            }
-
-            .brand {
-                margin-bottom: 0;
-                flex: 1;
-            }
-
-            .menu {
-                flex-direction: row;
-                flex-wrap: wrap;
-                gap: 4px;
-                width: 100%;
-            }
-
-            .menu-item a {
-                padding: 8px 12px;
-                font-size: 13px;
-            }
-
-            .logout-btn {
-                margin-top: 0;
-                border-top: none;
-                padding-top: 0;
-                border-left: 1px solid var(--border);
-                padding-left: 12px;
-            }
-
             main {
                 padding: 20px 16px;
             }
@@ -1065,56 +900,24 @@ try {
             .info-row {
                 grid-template-columns: 1fr;
             }
+        }
+
+        @media (max-width: 480px) {
+            .metrics-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
             }
 
-            @media (max-width: 480px) {
-                .metrics-grid {
-                    grid-template-columns: 1fr 1fr;
-                    gap: 10px;
-                }
-
-                .menu-item a {
-                    font-size: 12px;
-                    padding: 7px 10px;
-                }
-
-                header h1 {
-                    font-size: 22px;
-                }
-
-                .card-value {
-                    font-size: 22px;
-                }
+            header h1 {
+                font-size: 22px;
             }
-                /* ── NOTIFICATION BADGE ── */
-                .notif-badge {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin-left: auto;
-                    min-width: 18px;
-                    height: 18px;
-                    padding: 0 4px;
-                    background: #e53935;
-                    border: 2px solid #fff;
-                    border-radius: 50px;
-                    color: #fff;
-                    font-size: 10px;
-                    font-weight: bold;
-                    z-index: 100;
-                    transition: transform 0.2s ease, opacity 0.2s ease;
-                }
 
-                .notif-badge.hidden {
-                    transform: scale(0);
-                    opacity: 0;
-                }
+            .card-value {
+                font-size: 22px;
+            }
+        }
 
-                .notif-badge.hidden {
-                    transform: scale(0);
-                    opacity: 0;
-                }
-                /* ── ANIMATION FOR NEW APPLICATIONS ── */
+        /* ── ANIMATION FOR NEW APPLICATIONS ── */
                 @keyframes highlightNew {
                     0%   { opacity: 0; transform: translateY(-8px); background: #e8f5f1; }
                     30%  { opacity: 1; transform: translateY(0); background: #e8f5f1; }

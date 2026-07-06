@@ -147,6 +147,7 @@ try {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="sidebar.css">
     <style>
         :root {
             --green: #1a7a5e;
@@ -180,36 +181,6 @@ try {
             display: flex;
             min-height: 100vh;
         }
-
-        aside {
-            width: 260px;
-            background: var(--white);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            padding: 24px;
-        }
-
-        .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-bottom: 40px; padding-left: 8px; }
-        .brand-icon { width: 32px; height: 32px; background: var(--green); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-        .brand-icon svg { width: 18px; height: 18px; fill: white; }
-        .brand-text { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--text); }
-        .brand-text span { color: var(--green); }
-
-        .menu { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-        .menu-item a {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px 14px; color: var(--text-mid); text-decoration: none;
-            font-size: 14px; font-weight: 500; border-radius: var(--radius-sm);
-            transition: all 0.2s;
-        }
-        .menu-item.active a, .menu-item a:hover { background: var(--green-light); color: var(--green-dark); }
-        .menu-item a svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
-
-        .logout-btn { margin-top: auto; border-top: 1px solid var(--border); padding-top: 24px; }
 
         main { flex: 1; padding: 40px 48px; overflow-y: auto; }
 
@@ -339,63 +310,6 @@ try {
             z-index: 1;
         }
         @media (max-width: 768px) {
-            body { flex-direction: column; }
-
-            .menu-toggle { display: flex; }
-
-            aside {
-                width: 100%;
-                height: auto;
-                position: relative;
-                padding: 16px 20px;
-                flex-direction: row;
-                align-items: center;
-                flex-wrap: wrap;
-                gap: 12px;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
-            }
-
-            .brand { margin-bottom: 0; flex: 1; }
-
-            .menu {
-                flex-direction: column;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                width: 100%;
-                background: var(--white);
-                box-shadow: 0 10px 15px rgba(0,0,0,0.05);
-                border-bottom: 0 solid var(--border);
-                padding: 0;
-                max-height: 0;
-                opacity: 0;
-                overflow: hidden;
-                gap: 8px;
-                z-index: 1000;
-                transition: max-height 0.5s ease-in-out, opacity 0.3s ease-in-out, padding 0.4s ease-in-out;
-            }
-
-            .menu.active {
-                max-height: 500px;
-                opacity: 1;
-                padding: 16px 0;
-                border-bottom: 1px solid var(--border);
-            }
-
-            .menu-item a { padding: 10px 20px; font-size: 14px; }
-
-            .logout-btn {
-                margin-top: 0;
-                border-top: 1px solid var(--border);
-                padding-top: 0;
-                padding-left: 0;
-                border-left: none;
-                width: 100%;
-            }
-
-            .logout-btn a { padding: 12px 20px; }
-
             main { padding: 20px 16px; }
 
             header { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 20px; }
@@ -410,100 +324,13 @@ try {
             .table-scroll { max-height: 360px; }
             table { min-width: 480px; }
         }
-        .menu-toggle {
-            display: none;
-            position: relative;
-            width: 24px;
-            height: 18px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            padding: 0;
-            z-index: 1001;
-        }
-        .menu-toggle span {
-            position: absolute;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background-color: var(--green);
-            border-radius: 2px;
-            transition: top 0.3s ease, transform 0.3s ease, background-color 0.3s ease;
-        }
-        .menu-toggle span:nth-child(1) { top: 4px; }
-        .menu-toggle span:nth-child(2) { top: calc(100% - 7px); }
-        .menu-toggle.active span:nth-child(1) {
-            top: calc(50% - 1.5px);
-            transform: rotate(45deg);
-            background-color: var(--red);
-        }
-        .menu-toggle.active span:nth-child(2) {
-            top: calc(50% - 1.5px);
-            transform: rotate(-45deg);
-            background-color: var(--red);
-        }
     </style>
 </head>
 <body>
-    <aside>
-        <a href="admin_dashboard.php?page=dashboard" class="brand">
-            <div class="brand-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 2C9.5 2 7.5 3.5 6.5 5.5C5.5 4.5 4 4 3 5C1.5 6.5 2 9 3 11C4 13 5 14 5.5 16C6 18 6 20 7 21C7.5 21.5 8.5 22 9 21C9.5 20 9.5 18 10 17C10.5 16 11 15.5 12 15.5C13 15.5 13.5 16 14 17C14.5 18 14.5 20 15 21C15.5 22 16.5 21.5 17 21C18 20 18 18 18.5 16C19 14 20 13 21 11C22 9 22.5 6.5 21 5C20 4 18.5 4.5 17.5 5.5C16.5 3.5 14.5 2 12 2Z"/></svg>
-            </div>
-            <span class="brand-text">Dent<span>Care</span></span>
-        </a>
-
-        <button class="menu-toggle" id="menu-toggle" aria-label="Hap menunë">
-            <span></span>
-            <span></span>
-        </button>
-
-        <ul class="menu" id="nav-links">
-            <li class="menu-item">
-                <a href="admin_dashboard.php?page=dashboard">
-                    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                    Dashboard
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="admin_dashboard.php?page=appointments">
-                    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    Aplikimet
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="register_patient.php">
-                    <svg viewBox="0 0 24 24"><path d="M9 12h6"></path><path d="M12 9v6"></path><rect x="3" y="4" width="18" height="16" rx="2"></rect></svg>
-                    Regjistro Pacientin
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="admin_dashboard.php?page=schedules">
-                    <svg viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 6v6l4 2"></path></svg>
-                    Oraret
-                </a>
-            </li>
-            <li class="menu-item">
-                <a href="register_worker.php">
-                    <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
-                    Regjistro Punëtor
-                </a>
-            </li>
-            <li class="menu-item active">
-                <a href="check_in.php">
-                    <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-                    Check In
-                </a>
-            </li>
-        </ul>
-
-        <div class="menu-item logout-btn">
-            <a href="logout.php" style="color: #c0392b; display:flex; align-items:center; gap:12px; padding:12px 14px; text-decoration:none; font-size:14px; font-weight:500;">
-                <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#c0392b;fill:none;stroke-width:2;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                Log Out
-            </a>
-        </div>
-    </aside>
+    <?php
+        $current_page = 'checkin';
+        include 'sidebar.php';
+    ?>
 
     <main>
         <header>
@@ -695,28 +522,7 @@ try {
 
             if (noResults) noResults.style.display = visible === 0 ? '' : 'none';
         }
-        document.addEventListener("DOMContentLoaded", function () {
-            const menuToggle = document.getElementById('menu-toggle');
-            const navLinks = document.getElementById('nav-links');
-            if (!menuToggle || !navLinks) return;
-            menuToggle.addEventListener('click', function(e) {
-                e.stopPropagation();
-                navLinks.classList.toggle('active');
-                menuToggle.classList.toggle('active');
-            });
-            document.addEventListener('click', function(e) {
-                if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
-                    navLinks.classList.remove('active');
-                    menuToggle.classList.remove('active');
-                }
-            });
-            document.querySelectorAll('.menu a').forEach(link => {
-                link.addEventListener('click', () => {
-                    navLinks.classList.remove('active');
-                    menuToggle.classList.remove('active');
-                });
-            });
-        });
-    </script> 
+    </script>
+    <script src="sidebar-toggle.js"></script>
 </body>
 </html>
