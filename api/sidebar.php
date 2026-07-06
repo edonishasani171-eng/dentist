@@ -78,23 +78,15 @@ $new_appointments_count = $new_appointments_count ?? 0;
         </li>
         <li class="menu-item <?= $current_page === 'checkin' ? 'active' : '' ?>">
             <a href="check_in.php">
-                <svg viewBox="0 0 24 24">
-                    <path d="M9 11l3 3L22 4"></path>
-                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                </svg>
+                <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
                 Check In
             </a>
         </li>
+        <li class="menu-item logout-item">
+            <a href="logout.php" style="color: #c0392b;">
+                <svg viewBox="0 0 24 24" style="stroke: #c0392b;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                Log Out
+            </a>
+        </li>
     </ul>
-
-    <div class="menu-item logout-btn">
-        <a href="logout.php" style="color: #c0392b;">
-            <svg viewBox="0 0 24 24" style="stroke: #c0392b;">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-            Log Out
-        </a>
-    </div>
 </aside>
