@@ -989,7 +989,7 @@ try {
             <li class="menu-item <?= $current_page === 'register_patient' ? 'active' : '' ?>">
                 <a href="register_patient.php">
                     <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><line x1="19" y1="8" x2="19" y2="14"></line><line x1="22" y1="11" x2="16" y2="11"></line></svg>
-                    Regjistrimi i Pacientit
+                    Regjistro Pacientin
                 </a>
             </li>
             <li class="menu-item <?= $current_page === 'schedules' ? 'active' : '' ?>">
@@ -1822,6 +1822,31 @@ function filterAppByKryer(type) {
 
     if (noResults) noResults.style.display = visible === 0 ? '' : 'none';
 }
+document.addEventListener("DOMContentLoaded", function () {
+    const menuToggle = document.getElementById('menu-toggle');
+    const navLinks = document.getElementById('nav-links');
+    if (!menuToggle || !navLinks) return;
+
+    menuToggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        navLinks.classList.toggle('active');
+        menuToggle.classList.toggle('active');
+    });
+
+    document.addEventListener('click', function(e) {
+        if (!navLinks.contains(e.target) && !menuToggle.contains(e.target)) {
+            navLinks.classList.remove('active');
+            menuToggle.classList.remove('active');
+        }
+    });
+
+    document.querySelectorAll('.menu a').forEach(link => {
+        link.addEventListener('click', () => {
+            navLinks.classList.remove('active');
+            menuToggle.classList.remove('active');
+        });
+    });
+});
 </script>
 <!-- LOGOUT CONFIRM MODAL -->
 <div id="logoutConfirmModal" class="modal-overlay">
