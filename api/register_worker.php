@@ -783,7 +783,7 @@ $current_page = 'register_worker';
             background: var(--green);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 0;
             font-family: 'DM Sans', sans-serif;
             font-size: 14px;
             font-weight: 500;

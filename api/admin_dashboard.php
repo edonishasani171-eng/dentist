@@ -510,7 +510,7 @@ try {
 
         .btn {
             padding: 6px 12px;
-            border-radius: var(--radius-sm);
+            border-radius: 0;
             font-size: 13px;
             font-weight: 500;
             cursor: pointer;

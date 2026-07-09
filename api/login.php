@@ -231,7 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background: var(--green);
             color: var(--white);
             border: none;
-            border-radius: 10px;
+            border-radius: 0;
             font-family: 'DM Sans', sans-serif;
             font-size: 15px;
             font-weight: 500;
