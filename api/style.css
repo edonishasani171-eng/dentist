@@ -349,7 +349,7 @@ nav {
     padding: 10px 18px;
     background: var(--white);
     border: 1px solid var(--border);
-    border-radius: 50px;
+    border-radius: 0;
     font-size: 13px;
     color: var(--text-mid);
     white-space: nowrap;
@@ -563,7 +563,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
     background: var(--green);
     color: white;
     border: none;
-    border-radius: 12px;
+    border-radius: 0;
     font-family: 'DM Sans', sans-serif;
     font-size: 15px;
     font-weight: 500;
