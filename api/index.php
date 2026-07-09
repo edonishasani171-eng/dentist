@@ -35,6 +35,10 @@
     <div class="hero-bg-circle"></div> <div class="hero-bg-circle-bottom"></div> <div class="hero-tag">Tani pranojm aplikimet online</div>
     <h1>Kujdesu për <em>Buzëqeshjen tënde</em></h1>
     <p class="hero-sub">Aplikoni termin tuaj dental në më pak se 2 minuta. Asnjë thirrje telefoni, asnjë presje — thjesht zgjidhni kohën tuaj dhe ne do të bëjmë të gjitha gjera të tjera.</p>
+        <a href="#booking" class="hero-cta">
+            Rezervoni Terminin
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+    </a>
     <div class="hero-stats">
         <div class="hero-stat"><strong>300+</strong><span>Pacientë të trajtuar</span></div>
         <div class="hero-stat"><strong>12 vjet</strong><span>Eksperienca</span></div>
