@@ -365,13 +365,6 @@ $current_page = 'register_pacient';
                         </div>
                         <span class="field-error" id="err-time" style="margin-top:8px;">Ju lutem zgjidhni një orë</span>
                     </div>
-
-                    <div class="submit-area">
-                        <button type="submit" class="btn-submit" id="submit-btn">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                            Regjistro Pacientin
-                        </button>
-                    </div>
                 </div>
             </form>
         </div>
