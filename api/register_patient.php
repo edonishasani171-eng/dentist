@@ -95,7 +95,7 @@ try {
     $new_appointments_count = 0;
 }
 
-$current_page = 'register_pacient';
+$current_page = 'register_patient';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -292,11 +292,6 @@ $current_page = 'register_pacient';
     </style>
 </head>
 <body>
-    <?php
-        $current_page = 'register_patient'; // change this per file 
-        include 'sidebar.php';
-    ?>
-
     <main>
         <header>
             <div><h1>Regjistro Pacientin</h1></div>

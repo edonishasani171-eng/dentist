@@ -46,7 +46,7 @@ $new_appointments_count = $new_appointments_count ?? 0;
                 Aplikimet
             </a>
         </li>
-        <li class="menu-item <?= $current_page === 'register_patient' ? 'active' : '' ?>">
+        <li class="menu-item <?= in_array($current_page, ['register_patient', 'register_pacient'], true) ? 'active' : '' ?>">
             <a href="register_patient.php">
                 <svg viewBox="0 0 24 24">
                     <path d="M9 12h6"></path>
