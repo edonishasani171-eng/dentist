@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 'date'    => $date,
                 'time'    => $time,
             ]);
-            header('Location: register_pacient.php?success=1');
+            header('Location: register_patient.php?success=1');
             exit;
         } catch (PDOException $e) {
             error_log($e->getMessage());
@@ -317,7 +317,7 @@ $current_page = 'register_pacient';
                 </div>
             <?php endif; ?>
 
-            <form id="registerForm" method="POST" action="register_pacient.php">
+            <form id="registerForm" method="POST" action="register_patient.php">
                 <input type="hidden" name="action" value="register_patient">
                 <input type="hidden" name="time" id="time-input" value="">
 
@@ -364,6 +364,10 @@ $current_page = 'register_pacient';
                             <div class="slots-placeholder">Zgjidhni një datë më lart për të parë kohët e lira</div>
                         </div>
                         <span class="field-error" id="err-time" style="margin-top:8px;">Ju lutem zgjidhni një orë</span>
+                    </div>
+
+                    <div class="submit-area">
+                        <button type="submit" class="btn-submit">Regjistro pacientin në sistem</button>
                     </div>
                 </div>
             </form>
