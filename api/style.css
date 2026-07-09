@@ -276,21 +276,23 @@ nav {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: var(--green);
-    color: white;
+    background: transparent;
+    border: 2px solid var(--green);
+    color: var(--green);
     text-decoration: none;
-    padding: 14px 30px;
-    border-radius: 50px;
+    padding: 14px 28px;
+    border-radius: 0;
     font-family: 'DM Sans', sans-serif;
     font-size: 15px;
     font-weight: 500;
     letter-spacing: -0.01em;
     margin-bottom: 40px;
-    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    transition: background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
 }
 
 .hero-cta:hover {
-    background: var(--green-dark);
+    background: var(--green);
+    color: white;
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(26,122,94,0.25);
 }
@@ -298,11 +300,12 @@ nav {
 .hero-cta svg {
     width: 16px;
     height: 16px;
+    fill: currentColor;
 }
 
 @media (max-width: 480px) {
     .hero-cta {
-        padding: 12px 24px;
+        padding: 10px 22px;
         font-size: 14px;
     }
 }
