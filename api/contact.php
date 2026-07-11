@@ -213,7 +213,7 @@
                 <div class="form-row">
                     <div class="field">
                         <label for="c-name">Emri i Plotë *</label>
-                        <input type="text" id="c-name" placeholder="Besa Krasniqi">
+                        <input type="text" id="c-name" placeholder="Emri dhe Mbiemri">
                         <span class="field-error" id="c-err-name">Ju lutemi jepni emrin tuaj të plotë</span>
                     </div>
                     <div class="field">
@@ -224,7 +224,7 @@
                 <div class="form-row single" style="margin-top:14px">
                     <div class="field">
                         <label for="c-email">Email Adresa *</label>
-                        <input type="email" id="c-email" placeholder="besa@email.com">
+                        <input type="email" id="c-email" placeholder="arian@email.com">
                         <span class="field-error" id="c-err-email">Ju lutemi jepni një email të vlefshëm</span>
                     </div>
                 </div>
@@ -326,7 +326,6 @@
 
 <footer>
     <p>© 2026 DentCare Pejë. Të gjitha të drejtat e rezervuara.</p>
-    <a href="login.php">Portal i Personalit →</a>
 </footer>
 
 <div class="success-overlay" id="c-success-overlay">

@@ -56,6 +56,17 @@ $new_appointments_count = $new_appointments_count ?? 0;
                 Regjistro Pacientin
             </a>
         </li>
+        <li class="menu-item <?= $current_page === 'messages' ? 'active' : '' ?>">
+            <a href="messages.php">
+                <svg viewBox="0 0 24 24">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                Mesazhet e Klientëve
+                <span class="notif-badge <?= ($new_messages_count ?? 0) == 0 ? 'hidden' : '' ?>">
+                    <?= ($new_messages_count ?? 0) > 99 ? '99+' : ($new_messages_count ?? 0) ?>
+                </span>
+            </a>
+        </li>
         <li class="menu-item <?= $current_page === 'schedules' ? 'active' : '' ?>">
             <a href="admin_dashboard.php?page=schedules">
                 <svg viewBox="0 0 24 24">

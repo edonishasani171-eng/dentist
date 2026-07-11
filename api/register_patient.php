@@ -392,7 +392,7 @@ $current_page = 'register_patient';
                         <div class="form-row">
                             <div class="field">
                                 <label for="patient">Emri i Plotë *</label>
-                                <input type="text" id="patient" name="patient" placeholder="Besa Krasniqi">
+                                <input type="text" id="patient" name="patient" placeholder="Emri dhe Mbiemri">
                                 <span class="field-error" id="err-patient">Ju lutem jepni emrin e plotë</span>
                             </div>
                             <div class="field">

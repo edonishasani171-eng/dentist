@@ -93,7 +93,7 @@
                 <div class="form-row">
                     <div class="field">
                         <label for="name">Emri i Plotë *</label>
-                        <input type="text" id="name" placeholder="Besa Krasniqi" oninput="updateSummary()">
+                        <input type="text" id="name" placeholder="Emri dhe Mbiemri" oninput="updateSummary()">
                         <span class="field-error" id="err-name">Ju lutemi jepni emrin tuaj të plotë</span>
                     </div>
                     <div class="field">
@@ -105,7 +105,7 @@
                 <div class="form-row single" style="margin-top:14px">
                     <div class="field">
                         <label for="email">Email Adresa *</label>
-                        <input type="email" id="email" placeholder="besa@email.com" oninput="updateSummary()">
+                        <input type="email" id="email" placeholder="arian@email.com" oninput="updateSummary()">
                         <span class="field-error" id="err-email">Ju lutemi jepni një email të vlefshëm</span>
                     </div>
                 </div>
