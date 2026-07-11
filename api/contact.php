@@ -132,7 +132,7 @@
 </head>
 <body>
 <nav>
-    <a href="index.html" class="nav-logo">
+    <a href="index.php" class="nav-logo">
         <div class="nav-logo-icon">
             <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2C9.5 2 7.5 3.5 6.5 5.5C5.5 4.5 4 4 3 5C1.5 6.5 2 9 3 11C4 13 5 14 5.5 16C6 18 6 20 7 21C7.5 21.5 8.5 22 9 21C9.5 20 9.5 18 10 17C10.5 16 11 15.5 12 15.5C13 15.5 13.5 16 14 17C14.5 18 14.5 20 15 21C15.5 22 16.5 21.5 17 21C18 20 18 18 18.5 16C19 14 20 13 21 11C22 9 22.5 6.5 21 5C20 4 18.5 4.5 17.5 5.5C16.5 3.5 14.5 2 12 2Z"/>
@@ -146,9 +146,8 @@
         <span></span>
     </button>
     <ul class="nav-links" id="nav-links">
+        <li><a href="index.php">Faqja Hyrëse</a></li>
         <li><a href="#lokacioni">Lokacioni</a></li>
-        <li><a href="index.html#booking">Rezervoni</a></li>
-        <li><a href="contact.html" class="nav-phone">Kontaktoni</a></li>
     </ul>
 </nav>
 

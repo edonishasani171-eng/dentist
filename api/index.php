@@ -25,7 +25,6 @@
         <span></span>
     </button>
     <ul class="nav-links" id="nav-links">
-        <li><a href="index.php">Faqja Hyrëse</a></li>
         <li><a href="#lokacioni">Lokacioni</a></li>
         <li><a href="#booking">Rezervoni</a></li>
         <li><a href="contact.php" class="nav-phone">Kontaktoni</a></li>
