@@ -952,7 +952,6 @@ try {
     </div>
 </div>
     <?php
-        $current_page = 'admin_dashboard';
         include 'sidebar.php';
     ?>
     <main>
