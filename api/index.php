@@ -27,7 +27,7 @@
     <ul class="nav-links" id="nav-links">
         <li><a href="#lokacioni">Lokacioni</a></li>
         <li><a href="#booking">Rezervoni</a></li>
-        <li><a href="tel:+38344000000" class="nav-phone">+383 44 000 000</a></li>
+        <li><a href="contact.php" class="nav-phone">Kontaktoni</a></li>
     </ul>
 </nav>
 
