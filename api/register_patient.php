@@ -292,6 +292,10 @@ $current_page = 'register_patient';
     </style>
 </head>
 <body>
+        <?php
+            $current_page = 'register_patient';
+            include 'sidebar.php';
+        ?>
     <main>
         <header>
             <div><h1>Regjistro Pacientin</h1></div>
