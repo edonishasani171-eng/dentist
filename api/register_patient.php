@@ -253,21 +253,75 @@ $current_page = 'register_patient';
         .submit-area { padding: 24px 32px; }
 
         .btn-submit {
-            width: 100%; 
-            padding: 15px;
-            background: var(--green); 
-            color: white;
-            border: none; 
-            border-radius: 0;
+            width: 100%; padding: 15px;
+            background: transparent; color: var(--green);
+            border: 2px solid var(--green); border-radius: 12px;
             font-family: 'DM Sans', sans-serif;
-            font-size: 15px; 
-            font-weight: 500;
+            font-size: 15px; font-weight: 500;
             cursor: pointer;
-            transition: all .2s;
+            position: relative; overflow: hidden; z-index: 1;
+            transition: color 0.35s ease;
             display: flex; align-items: center; justify-content: center; gap: 8px;
         }
-        .btn-submit:hover { background: var(--green-dark); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(26,122,94,0.25); }
-        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-submit::before {
+            content: '';
+            position: absolute; top: 0; left: 0; width: 0%; height: 100%;
+            background: var(--green); z-index: -1;
+            transition: width 0.35s ease;
+        }
+        .btn-submit:hover { color: white; }
+        .btn-submit:hover::before { width: 100%; }
+        .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .success-overlay-full {
+            position: fixed; inset: 0; width: 100vw; height: 100vh;
+            background: var(--cream);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 99999;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        .success-overlay-full.active { opacity: 1; pointer-events: auto; }
+
+        .success-overlay-content {
+            text-align: center;
+            opacity: 0; transform: translateY(20px);
+            transition: opacity 0.5s cubic-bezier(0.16,1,0.3,1), transform 0.5s cubic-bezier(0.16,1,0.3,1);
+        }
+        .success-overlay-full.active .success-overlay-content { opacity: 1; transform: translateY(0); }
+
+        .success-pulse {
+            width: 70px; height: 70px;
+            background: var(--green);
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 24px;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(26,122,94,0.15);
+            animation: pulse-main 2s infinite ease-in-out;
+        }
+        .success-pulse::before {
+            content: '';
+            position: absolute; width: 100%; height: 100%;
+            background: var(--green); border-radius: 20px; opacity: 0.4;
+            animation: pulse-ring 2s infinite ease-out;
+        }
+        @keyframes pulse-main { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+        @keyframes pulse-ring { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.4); opacity: 0; } }
+
+        .success-overlay-content h2 {
+            font-family: 'DM Serif Display', serif;
+            font-size: 26px; color: var(--text); margin-bottom: 20px;
+        }
+
+        .success-progress-bar {
+            width: 220px; height: 3px; background: rgba(26,122,94,0.15);
+            border-radius: 999px; margin: 0 auto; overflow: hidden;
+        }
+        .success-progress-fill {
+            height: 100%; width: 0%; background: var(--green); border-radius: 999px;
+            transition: width 1.8s linear;
+        }
 
         /* ── ALERTS ── */
         .alert-banner {
@@ -280,11 +334,6 @@ $current_page = 'register_patient';
             background: #fdf2f2;
             border: 1px solid #f5baba;
             color: #c0392b;
-        }
-        .alert-success {
-            background: var(--green-light);
-            border: 1px solid var(--green-mid);
-            color: var(--green-dark);
         }
         .alert-banner ul { margin: 6px 0 0 18px; }
 
@@ -300,6 +349,20 @@ $current_page = 'register_patient';
             $current_page = 'register_patient';
             include 'sidebar.php';
         ?>
+
+        <?php if ($success): ?>
+            <div id="successOverlay" class="success-overlay-full active">
+                <div class="success-overlay-content">
+                    <div class="success-pulse">
+                        <svg viewBox="0 0 24 24" style="width:36px;height:36px;stroke:white;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
+                    <h2>Pacienti u regjistrua me sukses!</h2>
+                    <div class="success-progress-bar"><div class="success-progress-fill" id="successProgressFill"></div></div>
+                </div>
+            </div>
+            <?php endif; ?>
     <main>
         <header>
             <div><h1>Regjistro Pacientin</h1></div>
@@ -309,10 +372,6 @@ $current_page = 'register_patient';
         </header>
 
         <div class="register-wrap">
-            <?php if ($success): ?>
-                <div class="alert-banner alert-success">✓ Pacienti u regjistrua me sukses!</div>
-            <?php endif; ?>
-
             <?php if (!empty($errors)): ?>
                 <div class="alert-banner alert-error">
                     <strong>Ndodhën këto probleme:</strong>
@@ -466,6 +525,23 @@ $current_page = 'register_patient';
         document.getElementById(errId).style.display = show ? 'block' : 'none';
         document.getElementById(inputId).classList.toggle('error', show);
     }
+    
+    <?php if ($success): ?>
+document.addEventListener('DOMContentLoaded', function() {
+    const overlay = document.getElementById('successOverlay');
+    const fill = document.getElementById('successProgressFill');
+    requestAnimationFrame(() => { fill.style.width = '100%'; });
+
+    setTimeout(() => {
+        overlay.classList.remove('active');
+    }, 2000);
+
+    setTimeout(() => {
+        overlay.remove();
+        window.history.replaceState({}, document.title, 'register_patient.php');
+    }, 2500);
+});
+<?php endif; ?>
 </script>
 <script src="sidebar-toggle.js"></script>
 </body>
