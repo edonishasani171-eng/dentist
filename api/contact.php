@@ -1,3 +1,58 @@
+<?php
+require_once 'db.php'; // your existing PDO connection, same one messages.php uses
+
+// Make sure table exists (same as admin/messages.php)
+$pdo->exec("
+    CREATE TABLE IF NOT EXISTS messages (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        phone VARCHAR(50),
+        email VARCHAR(255) NOT NULL,
+        subject VARCHAR(255) NOT NULL,
+        message TEXT NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'New',
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+");
+
+// If this is the AJAX POST from the form's JS, handle it and stop here
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
+
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    $name    = trim($input['name'] ?? '');
+    $phone   = trim($input['phone'] ?? '');
+    $email   = trim($input['email'] ?? '');
+    $subject = trim($input['subject'] ?? '');
+    $message = trim($input['message'] ?? '');
+
+    if (!$name || !$email || !filter_var($email, FILTER_VALIDATE_EMAIL) || !$subject || !$message) {
+        echo json_encode(['success' => false, 'message' => 'Ju lutem plotësoni të gjitha fushat e kërkuara.']);
+        exit;
+    }
+
+    try {
+        $stmt = $pdo->prepare("
+            INSERT INTO messages (name, phone, email, subject, message)
+            VALUES (:name, :phone, :email, :subject, :message)
+        ");
+        $stmt->execute([
+            'name'    => $name,
+            'phone'   => $phone,
+            'email'   => $email,
+            'subject' => $subject,
+            'message' => $message,
+        ]);
+
+        echo json_encode(['success' => true]);
+    } catch (PDOException $e) {
+        error_log($e->getMessage());
+        echo json_encode(['success' => false, 'message' => 'Gabim në server. Provoni përsëri më vonë.']);
+    }
+    exit; // critical — stop before the HTML below renders
+}
+?>
 <!DOCTYPE html>
 <html lang="sq">
 <head>
