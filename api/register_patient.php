@@ -253,11 +253,15 @@ $current_page = 'register_patient';
         .submit-area { padding: 24px 32px; }
 
         .btn-submit {
-            width: 100%; padding: 15px;
-            background: var(--green); color: white;
-            border: none; border-radius: 12px;
+            width: 100%; 
+            padding: 15px;
+            background: var(--green); 
+            color: white;
+            border: none; 
+            border-radius: 0;
             font-family: 'DM Sans', sans-serif;
-            font-size: 15px; font-weight: 500;
+            font-size: 15px; 
+            font-weight: 500;
             cursor: pointer;
             transition: all .2s;
             display: flex; align-items: center; justify-content: center; gap: 8px;

@@ -220,7 +220,7 @@ try {
         .badge-cancelled { background: var(--orange-light); color: var(--orange); }
         .badge-out { background: var(--cream-dark); color: var(--text-soft); }
 
-        .btn { padding: 6px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: background 0.2s; }
+        .btn { padding: 6px 14px; border-radius: 0; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: background 0.2s; }
         .btn-approve { background: var(--green); color: var(--white); }
         .btn-approve:hover { background: var(--green-dark); }
         .btn-cancel { background: var(--orange); color: var(--white); }

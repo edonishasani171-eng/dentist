@@ -780,19 +780,40 @@ $current_page = 'register_worker';
         .btn-register {
             width: 100%;
             padding: 13px;
-            background: var(--green);
-            color: white;
-            border: none;
-            border-radius: 0;
+            background: transparent;
+            color: var(--green);
+            border: 2px solid var(--green);
+            border-radius: 10px;
             font-family: 'DM Sans', sans-serif;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            transition: all .2s;
             margin-top: 8px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            transition: color 0.35s ease;
         }
 
-        .btn-register:hover { background: var(--green-dark); }
+        .btn-register::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: var(--green);
+            z-index: -1;
+            transition: width 0.35s ease;
+        }
+
+        .btn-register:hover {
+            color: white;
+        }
+
+        .btn-register:hover::before {
+            width: 100%;
+        }
 
         /* ── WORKERS LIST CARD ── */
         .list-card {
