@@ -28,19 +28,6 @@ $pdo->exec("
     )
 ");
 
-// ── HANDLE ACTION: MARK AS READ ──
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'mark_read') {
-    $target_id = (int)$_POST['message_id'];
-    try {
-        $stmt = $pdo->prepare("UPDATE messages SET status = 'Read' WHERE id = :id");
-        $stmt->execute(['id' => $target_id]);
-    } catch (PDOException $e) {
-        error_log($e->getMessage());
-    }
-    header("Location: messages.php");
-    exit;
-}
-
 // ── HANDLE ACTION: DELETE MESSAGE ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_message') {
     $target_id = (int)$_POST['message_id'];
@@ -520,11 +507,6 @@ $new_messages_count = $unread_messages_count; // used by sidebar.php badge
                 </div>
 
                 <div class="modal-footer">
-                    <form id="msg-modal-read-form" method="POST" action="">
-                        <input type="hidden" name="message_id" id="msg-modal-read-id" value="">
-                        <input type="hidden" name="action" value="mark_read">
-                        <button type="submit" class="btn btn-approve" id="msg-modal-read-btn">Shëno si Lexuar</button>
-                    </form>
 
                     <form id="msg-modal-accept-form" method="POST" action="">
                         <input type="hidden" name="message_id" id="msg-modal-accept-id" value="">
@@ -592,12 +574,9 @@ $new_messages_count = $unread_messages_count; // used by sidebar.php badge
         document.getElementById('msg-modal-subject').textContent = msgData.subject;
         document.getElementById('msg-modal-message').textContent = msgData.message;
 
-        document.getElementById('msg-modal-read-id').value = msgData.id;
         document.getElementById('msg-modal-accept-id').value = msgData.id;
         document.getElementById('msg-modal-cancel-id').value = msgData.id;
         document.getElementById('msg-modal-delete-id').value = msgData.id;
-
-        document.getElementById('msg-modal-read-btn').style.display = msgData.status === 'New' ? 'inline-block' : 'none';
 
         document.getElementById('messageModal').classList.add('active');
     }
