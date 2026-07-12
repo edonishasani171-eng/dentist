@@ -54,6 +54,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
+// ── HANDLE ACTION: ACCEPT (PRANO) ──
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'accept_message') {
+    $target_id = (int)$_POST['message_id'];
+    try {
+        $stmt = $pdo->prepare("UPDATE messages SET status = 'Prano' WHERE id = :id");
+        $stmt->execute(['id' => $target_id]);
+    } catch (PDOException $e) {
+        error_log($e->getMessage());
+    }
+    header("Location: messages.php");
+    exit;
+}
+
+// ── HANDLE ACTION: CANCEL (ANULO) ──
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'cancel_message') {
+    $target_id = (int)$_POST['message_id'];
+    try {
+        $stmt = $pdo->prepare("UPDATE messages SET status = 'Anulo' WHERE id = :id");
+        $stmt->execute(['id' => $target_id]);
+    } catch (PDOException $e) {
+        error_log($e->getMessage());
+    }
+    header("Location: messages.php");
+    exit;
+}
+
 // ── FETCH MESSAGES ──
 try {
     $msg_stmt = $pdo->query("SELECT id, name, phone, email, subject, message, status, created_at FROM messages ORDER BY id DESC");
@@ -241,6 +267,8 @@ $new_messages_count = $unread_messages_count; // used by sidebar.php badge
         }
         .badge-unread { background: var(--green-light); color: var(--green-dark); }
         .badge-read   { background: var(--cream-dark); color: var(--text-soft); }
+        .badge-approved  { background: var(--green-light); color: var(--green-dark); }
+        .badge-cancelled { background: var(--orange-light); color: #df473c; }
 
         .msg-subject { font-weight: 500; color: var(--text); }
         .msg-preview {
@@ -424,13 +452,30 @@ $new_messages_count = $unread_messages_count; // used by sidebar.php badge
                         <td>
                             <?php if ($msg['status'] === 'New'): ?>
                                 <span class="badge badge-unread">● E Re</span>
-                            <?php else: ?>
+                            <?php elseif ($msg['status'] === 'Read'): ?>
                                 <span class="badge badge-read">✓ Lexuar</span>
+                            <?php elseif ($msg['status'] === 'Prano'): ?>
+                                <span class="badge badge-approved">✓ Prano</span>
+                            <?php elseif ($msg['status'] === 'Anulo'): ?>
+                                <span class="badge badge-cancelled">✕ Anulo</span>
                             <?php endif; ?>
                         </td>
                         <td>
                             <div class="actions">
                                 <button class="btn btn-secondary" onclick="showMessageDetails(<?= htmlspecialchars(json_encode($msg), ENT_QUOTES, 'UTF-8') ?>)">Shiko</button>
+
+                                <form id="acceptmsg-form-<?= $msg['id'] ?>" method="POST" action="" style="display:inline;">
+                                    <input type="hidden" name="message_id" value="<?= $msg['id'] ?>">
+                                    <input type="hidden" name="action" value="accept_message">
+                                    <button type="submit" class="btn btn-approve">Prano</button>
+                                </form>
+
+                                <form id="cancelmsg-form-<?= $msg['id'] ?>" method="POST" action="" style="display:inline;">
+                                    <input type="hidden" name="message_id" value="<?= $msg['id'] ?>">
+                                    <input type="hidden" name="action" value="cancel_message">
+                                    <button type="submit" class="btn btn-cancel">Anulo</button>
+                                </form>
+
                                 <form id="delmsg-form-<?= $msg['id'] ?>" method="POST" action="" style="display:inline;">
                                     <input type="hidden" name="message_id" value="<?= $msg['id'] ?>">
                                     <input type="hidden" name="action" value="delete_message">
@@ -480,6 +525,19 @@ $new_messages_count = $unread_messages_count; // used by sidebar.php badge
                         <input type="hidden" name="action" value="mark_read">
                         <button type="submit" class="btn btn-approve" id="msg-modal-read-btn">Shëno si Lexuar</button>
                     </form>
+
+                    <form id="msg-modal-accept-form" method="POST" action="">
+                        <input type="hidden" name="message_id" id="msg-modal-accept-id" value="">
+                        <input type="hidden" name="action" value="accept_message">
+                        <button type="submit" class="btn btn-approve">Prano</button>
+                    </form>
+
+                    <form id="msg-modal-cancel-form" method="POST" action="">
+                        <input type="hidden" name="message_id" id="msg-modal-cancel-id" value="">
+                        <input type="hidden" name="action" value="cancel_message">
+                        <button type="submit" class="btn btn-cancel">Anulo</button>
+                    </form>
+
                     <form id="msg-modal-delete-form" method="POST" action="">
                         <input type="hidden" name="message_id" id="msg-modal-delete-id" value="">
                         <input type="hidden" name="action" value="delete_message">
@@ -535,6 +593,8 @@ $new_messages_count = $unread_messages_count; // used by sidebar.php badge
         document.getElementById('msg-modal-message').textContent = msgData.message;
 
         document.getElementById('msg-modal-read-id').value = msgData.id;
+        document.getElementById('msg-modal-accept-id').value = msgData.id;
+        document.getElementById('msg-modal-cancel-id').value = msgData.id;
         document.getElementById('msg-modal-delete-id').value = msgData.id;
 
         document.getElementById('msg-modal-read-btn').style.display = msgData.status === 'New' ? 'inline-block' : 'none';
