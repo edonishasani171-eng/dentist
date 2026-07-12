@@ -148,7 +148,10 @@ $current_page = 'register_patient';
         header h1 { font-family: 'DM Serif Display', serif; font-size: 28px; letter-spacing: -0.01em; }
 
         /* ── FORM CARD (design lifted from the public booking page / style.css) ── */
-        .register-wrap { max-width: 640px; }
+        .register-wrap { 
+            max-width: 640px; 
+            margin: 0 auto;
+        }
 
         .form-card {
             background: var(--white);
@@ -365,9 +368,9 @@ $current_page = 'register_patient';
             </div>
             <?php endif; ?>
     <main>
-        <header>
+        <header style="flex-direction: column; align-items: center; gap: 16px;">
             <div><h1>Regjistro Pacientin</h1></div>
-            <div class="user-profile" style="display:flex; align-items:center; gap:12px; background:var(--white); padding:8px 16px; border-radius:50px; border:1px solid var(--border); font-size:14px; font-weight:500;">
+            <div class="user-profile" style="align-self: flex-end;">
                 <span><?= htmlspecialchars($staff_name) ?></span>
             </div>
         </header>

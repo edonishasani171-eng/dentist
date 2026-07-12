@@ -953,7 +953,6 @@ try {
 </div>
     <?php
         include 'sidebar.php';
-        var_dump($new_messages_count); // TEMPORARY - remove after testing
     ?>
     <main>
         <?php if ($current_page === 'dashboard'): ?>

@@ -1,6 +1,16 @@
 <?php
-$new_appointments_count = $new_appointments_count ?? 0;
-
+if (!isset($new_appointments_count)) {
+    $new_appointments_count = 0;
+    try {
+        if (isset($pdo)) {
+            $pending_stmt = $pdo->query("SELECT COUNT(*) FROM appointments WHERE status = 'Pending'");
+            $new_appointments_count = (int) $pending_stmt->fetchColumn();
+        }
+    } catch (PDOException $e) {
+        error_log($e->getMessage());
+        $new_appointments_count = 0;
+    }
+}
 // ── LIVE UNREAD MESSAGE COUNT (works on every page, not just messages.php) ──
 if (!isset($new_messages_count)) {
     $new_messages_count = 0;
