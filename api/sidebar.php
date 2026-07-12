@@ -1,10 +1,31 @@
 <?php
-// admin/sidebar.php
-// Expects two variables to be set BEFORE this file is included:
-// $current_page          -> string identifying which page is active (e.g. 'dashboard', 'appointments', 'register_pacient', 'register_worker', 'checkin')
-// $new_appointments_count -> int, for the notification badge (default to 0 if not set)
-
 $new_appointments_count = $new_appointments_count ?? 0;
+
+// ── LIVE UNREAD MESSAGE COUNT (works on every page, not just messages.php) ──
+if (!isset($new_messages_count)) {
+    $new_messages_count = 0;
+    try {
+        if (isset($pdo)) {
+            $pdo->exec("
+                CREATE TABLE IF NOT EXISTS messages (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    phone VARCHAR(50),
+                    email VARCHAR(255) NOT NULL,
+                    subject VARCHAR(255) NOT NULL,
+                    message TEXT NOT NULL,
+                    status VARCHAR(20) NOT NULL DEFAULT 'New',
+                    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+                )
+            ");
+            $msg_count_stmt = $pdo->query("SELECT COUNT(*) FROM messages WHERE status = 'New'");
+            $new_messages_count = (int) $msg_count_stmt->fetchColumn();
+        }
+    } catch (PDOException $e) {
+        error_log($e->getMessage());
+        $new_messages_count = 0;
+    }
+}
 ?>
 <aside>
     <a href="admin_dashboard.php?page=dashboard" class="brand">

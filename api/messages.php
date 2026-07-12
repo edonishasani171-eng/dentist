@@ -284,6 +284,8 @@ $new_messages_count = $unread_messages_count; // used by sidebar.php badge
         .btn-approve:hover { background: var(--green-dark); }
         .btn-delete { background: #df473c; color: var(--white); }
         .btn-delete:hover { background: var(--red); }
+        .btn-cancel { background: var(--orange); color: var(--white); }
+        .btn-cancel:hover { background: #c6632f; }
         .btn-secondary { background: var(--cream); color: var(--text-mid); border: 1px solid var(--border); }
         .btn-secondary:hover { background: var(--cream-dark); }
 

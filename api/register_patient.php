@@ -155,6 +155,7 @@ $current_page = 'register_patient';
             border: 1px solid var(--border);
             border-radius: var(--radius);
             max-width: 700px;
+            position: relative;
             margin: 0 auto;
             overflow: hidden;
             box-shadow: var(--shadow);
