@@ -35,8 +35,8 @@
     <div class="hero-bg-circle"></div> <div class="hero-bg-circle-bottom"></div> 
     <div class="hero-tag">
         <span class="hero-tag-track">
-            <span class="hero-tag-item">-Tani pranojm edhe aplikimet online shkoni me posht per te rezervuar terminin e juaj.</span>
-            <span class="hero-tag-item">-Tani pranojm edhe aplikimet online shkoni me posht per te rezervuar terminin e juaj.</span>
+            <span class="hero-tag-item">- Tani pranojm edhe aplikimet online shkoni me posht per te rezervuar terminin e juaj.</span>
+            <span class="hero-tag-item">- Tani pranojm edhe aplikimet online shkoni me posht per te rezervuar terminin e juaj.</span>
         </span>
     </div>
     <h1>Kujdesu për <em>Buzëqeshjen tënde</em></h1>
