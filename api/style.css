@@ -305,7 +305,7 @@ nav {
 
 @media (max-width: 480px) {
     .hero-cta {
-        padding: 10px 22px;
+        padding: 10px 10px;
         font-size: 14px;
     }
 }

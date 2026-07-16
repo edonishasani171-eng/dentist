@@ -209,7 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <section class="hero contact-hero">
     <div class="hero-bg-circle"></div>
     <div class="hero-bg-circle-bottom"></div>
-    <div class="hero-tag">Jemi këtu për ju</div>
+    <div class="hero-tag">Jemi këtu për ju klikoni butonat me posht per te na kontaktuar</div>
     <h1>Na <em>Kontaktoni</em></h1>
     <p class="hero-sub">Keni pyetje rreth një shërbimi, urgjencë dentale, apo dëshironi thjesht të na thoni përshëndetje? Na shkruani më poshtë ose na gjeni direkt.</p>
     
