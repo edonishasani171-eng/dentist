@@ -32,7 +32,13 @@
 </nav>
 
 <section class="hero">
-    <div class="hero-bg-circle"></div> <div class="hero-bg-circle-bottom"></div> <div class="hero-tag">Tani pranojm edhe aplikimet online shkoni me posht per te rezervuar terminin e juaj</div>
+    <div class="hero-bg-circle"></div> <div class="hero-bg-circle-bottom"></div> 
+    <div class="hero-tag">
+        <span class="hero-tag-track">
+            <span class="hero-tag-item">Tani pranojm edhe aplikimet online shkoni me posht per te rezervuar terminin e juaj</span>
+            <span class="hero-tag-item">Tani pranojm edhe aplikimet online shkoni me posht per te rezervuar terminin e juaj</span>
+        </span>
+    </div>
     <h1>Kujdesu për <em>Buzëqeshjen tënde</em></h1>
     <p class="hero-sub">Aplikoni termin tuaj dental në më pak se 2 minuta. Asnjë thirrje telefoni, asnjë presje — thjesht zgjidhni kohën tuaj dhe ne do të bëjmë të gjitha gjera të tjera.</p>
         <a href="#booking" class="hero-cta">
