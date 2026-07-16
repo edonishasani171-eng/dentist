@@ -211,8 +211,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="hero-bg-circle-bottom"></div>
     <div class="hero-tag">
         <span class="hero-tag-track">
-            <span class="hero-tag-item">Jemi këtu për ju klikoni butonat me posht per te na kontaktuar</span>
-            <span class="hero-tag-item">Jemi këtu për ju klikoni butonat me posht per te na kontaktuar</span>
+            <span class="hero-tag-item">-Jemi këtu për ju klikoni butonat me posht per te na kontaktuar.</span>
+            <span class="hero-tag-item">-Jemi këtu për ju klikoni butonat me posht per te na kontaktuar.</span>
         </span>
     </div>
     <h1>Na <em>Kontaktoni</em></h1>
