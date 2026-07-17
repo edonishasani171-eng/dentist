@@ -8,7 +8,7 @@ if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
 
 require_once 'db.php';
 
-$staff_name = $_SESSION['username'] ?? $_SESSION['staff_name'] ?? 'Admin Staf';
+$staff_name = $_SESSION['user_username'] ?? $_SESSION['username'] ?? $_SESSION['staff_name'] ?? 'Admin Staf';
 $today = date('Y-m-d');
 
 // ── STAFF CHECK IN ──

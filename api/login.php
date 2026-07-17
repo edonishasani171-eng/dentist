@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['authenticated'] = true;
                     $_SESSION['user_id'] = $user['id'];
                     $_SESSION['user_role'] = $user['role'];
+                    $_SESSION['user_username'] = $user['username'];
                     
                     // Toggle animation flag to keep loader visible on redirect
                     $show_animation = true;

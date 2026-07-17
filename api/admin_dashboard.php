@@ -2,8 +2,7 @@
 // admin/admin_dashboard.php
 session_start();
 
-$staff_name = $_SESSION['username'] ?? $_SESSION['staff_name'] ?? 'Admin Staf';
-
+$staff_name = $_SESSION['user_username'] ?? $_SESSION['username'] ?? $_SESSION['staff_name'] ?? 'Admin Staf';
 // Security check
 if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
     header('Location: login.php');
