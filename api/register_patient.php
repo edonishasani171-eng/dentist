@@ -334,9 +334,10 @@ $current_page = 'register_patient';
             gap: 12px;
             background: #fff;
             padding: 8px 16px;
-            border-radius: 999px;
+            border-radius: 50px;
             border: 1px solid var(--border);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            font-size: 14px;
+            font-weight: 500;
         }
 
         .user-profile span {
