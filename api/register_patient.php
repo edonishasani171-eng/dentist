@@ -332,12 +332,19 @@ $current_page = 'register_patient';
             display: flex;
             align-items: center;
             gap: 12px;
+            background: #fff;
+            padding: 8px 16px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
         }
+
         .user-profile span {
             font-size: 14px;
             font-weight: 500;
             color: var(--text);
         }
+
         .avatar {
             width: 38px;
             height: 38px;
