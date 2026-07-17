@@ -340,12 +340,6 @@ $current_page = 'register_patient';
             font-weight: 500;
         }
 
-        .user-profile span {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text);
-        }
-
         .avatar {
             width: 38px;
             height: 38px;
