@@ -1086,6 +1086,12 @@ try {
         <div>
             <h1>Të gjitha Aplikimet</h1>
         </div>
+        <div class="user-profile">
+            <div class="avatar">
+                <?= strtoupper(substr(htmlspecialchars($staff_name), 0, 1)) ?>
+            </div>
+            <span><?= htmlspecialchars($staff_name) ?></span>
+        </div>
     </header>
 
     <!-- Stat boxes -->
@@ -1208,6 +1214,12 @@ try {
             <header>
                 <div>
                     <h1>Oraret</h1>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar">
+                        <?= strtoupper(substr(htmlspecialchars($staff_name), 0, 1)) ?>
+                    </div>
+                    <span><?= htmlspecialchars($staff_name) ?></span>
                 </div>
             </header>
             <div class="card">

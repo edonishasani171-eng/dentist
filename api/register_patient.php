@@ -327,6 +327,31 @@ $current_page = 'register_patient';
             transition: width 1.8s linear;
         }
 
+        /* ── USER PROFILE BADGE ── */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .user-profile span {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+        }
+        .avatar {
+            width: 38px;
+            height: 38px;
+            background: var(--green-light);
+            color: var(--green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            border: 1px solid var(--green-mid);
+        }
+
         /* ── ALERTS ── */
         .alert-banner {
             padding: 14px 18px;
@@ -368,9 +393,14 @@ $current_page = 'register_patient';
             </div>
             <?php endif; ?>
     <main>
-        <header style="flex-direction: column; align-items: center; gap: 16px;">
-            <div><h1>Regjistro Pacientin</h1></div>
-            <div class="user-profile" style="align-self: flex-end;">
+        <header>
+            <div>
+                <h1>Regjistro Pacientin</h1>
+            </div>
+            <div class="user-profile">
+                <div class="avatar">
+                    <?= strtoupper(substr(htmlspecialchars($staff_name), 0, 1)) ?>
+                </div>
                 <span><?= htmlspecialchars($staff_name) ?></span>
             </div>
         </header>

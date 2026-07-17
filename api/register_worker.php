@@ -460,8 +460,11 @@ try {
     }
 }
 
-$staff_name = $_SESSION['username'] ?? 'Admin Staf';
-$current_page = 'register_worker';
+$staff_name = $_SESSION['user_username']
+    ?? $_SESSION['username']
+    ?? $_SESSION['staff_name']
+    ?? 'Admin Staf';
+    $current_page = 'register_worker';
 ?>
 <!DOCTYPE html>
 <html lang="en">

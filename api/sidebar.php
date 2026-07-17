@@ -126,10 +126,53 @@ if (!isset($new_messages_count)) {
         </li>
     </ul>
 
+    <!-- Logout Button Trigger -->
     <div class="menu-item logout-btn">
-        <a href="logout.php" style="color: #c0392b;">
+        <a href="#" id="logoutTrigger" style="color: #c0392b;">
             <svg viewBox="0 0 24 24" style="stroke: #c0392b;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
             Log Out
         </a>
     </div>
+
+    <!-- Custom Styled Logout Modal Overlay -->
+    <div id="logoutModal" style="position: fixed; inset: 0; width: 100vw; height: 100vh; background: rgba(26, 26, 24, 0.4); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 99999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;">
+        <div style="background: #ffffff; border: 1px solid rgba(26,26,24,0.10); border-radius: 14px; padding: 32px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.08); transform: translateY(20px); transition: transform 0.3s ease;" id="logoutModalContent">
+            <div style="width: 56px; height: 56px; background: #fdf2f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 18px; border: 1px solid #f5baba;">
+                <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; stroke: #c0392b; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
+            <h3 style="font-family: 'DM Serif Display', serif; font-size: 22px; color: #1a1a18; margin-bottom: 8px;">A jeni të sigurt?</h3>
+            <p style="font-family: 'DM Sans', sans-serif; font-size: 14px; color: #4a4a44; margin-bottom: 24px; line-height: 1.5;">Dëshironi të çndajeni nga sistemi i DentCare Pejë?</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <button id="cancelLogout" style="padding: 12px; background: #faf8f4; border: 1px solid rgba(26,26,24,0.10); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: #4a4a45; cursor: pointer; transition: background 0.2s;">Anulo</button>
+                <a href="logout.php" style="padding: 12px; background: #c0392b; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; color: #ffffff; text-decoration: none; display: flex; align-items: center; justify-content: center; transition: background 0.2s; border: none;">Po, Çkyçu</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const trigger = document.getElementById('logoutTrigger');
+        const modal = document.getElementById('logoutModal');
+        const content = document.getElementById('logoutModalContent');
+        const cancelBtn = document.getElementById('cancelLogout');
+
+        trigger.addEventListener('click', function(e) {
+            e.preventDefault();
+            modal.style.opacity = '1';
+            modal.style.pointerEvents = 'auto';
+            content.style.transform = 'translateY(0)';
+        });
+
+        function closeModal() {
+            modal.style.opacity = '0';
+            modal.style.pointerEvents = 'none';
+            content.style.transform = 'translateY(20px)';
+        }
+
+        cancelBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) closeModal();
+        });
+    });
+    </script>
 </aside>
